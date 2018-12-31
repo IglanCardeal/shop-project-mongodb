@@ -1,29 +1,29 @@
 const path = require('path');
 const PORT = process.env.PORT || 3000;
-
 const express = require('express');
+const app = express();
 const bodyParser = require('body-parser');
-
-const errorController = require('./app/controllers/error');
+const { dataBaseConnection } = require(path.resolve('database', 'connection'));
 const User = require('./app/models/user');
 
-const app = express();
-
 app.set('view engine', 'ejs');
-app.set('views', 'views');
+app.set('views', './app/views');
 
 const adminRoutes = require('./app/routes/admin');
 const shopRoutes = require('./app/routes/shop');
-
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+const errorController = require('./app/controllers/error');
 
 app.use((req, res, next) => {
-});
-
+  // aqui definimos um user para a requisicao
+  next();
+})
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'app', 'public')));
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
-
 app.use(errorController.get404);
 
-app.listen(PORT, () => console.log(`Server On - PORT ${PORT}`))
+dataBaseConnection(() => {
+  console.log('Connection to MongoDB stablished with success!');
+  app.listen(PORT, () => console.log(`Server On - PORT ${PORT}`));
+});
