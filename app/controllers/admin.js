@@ -76,3 +76,12 @@ exports.postDeleteProduct = (req, res, next) => {
     })
     .catch(err => console.log(err));
 };
+
+exports.postUserData = (req, res, next) => {
+  const { username, email } = req.user;
+  const userData = { 
+    username: username, 
+    email: email 
+  };
+  res.send(JSON.stringify(userData));
+};

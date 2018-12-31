@@ -76,5 +76,4 @@ module.exports = class Product {
 /*
   ObjectId - provido pelo mongodb para gerar um dado id unico em um objeto para cada documento caso seja omitido uma especificacao. Logo o _id e um objeto e nao uma string.
     ref: https://docs.mongodb.com/manual/reference/bson-types/#objectid
-
 */

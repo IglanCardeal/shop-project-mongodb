@@ -13,15 +13,34 @@ const adminRoutes = require('./app/routes/admin');
 const shopRoutes = require('./app/routes/shop');
 const errorController = require('./app/controllers/error');
 
-app.use((req, res, next) => {
-  // aqui definimos um user para a requisicao
-  next();
-})
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'app', 'public')));
+
+app.use((req, res, next) => {
+  User.findUserById('5c2a7ae8322d583394548a4c')
+    .then(user => {
+      if (user) {
+        req.user = user;
+        return next();
+      }
+      const userData = {
+        username: 'Cardeal',
+        email: 'test@email.com',
+        password: '123'
+      };
+      const newUser = new User(userData);
+      newUser.save()
+        .then(result => {
+          if (result === 'success')
+            return next();
+        });
+    })
+    .catch(e => console.log(e));
+});
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(errorController.get404);
+
 
 dataBaseConnection(() => {
   console.log('Connection to MongoDB stablished with success!');

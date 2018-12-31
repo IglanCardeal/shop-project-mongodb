@@ -63,6 +63,22 @@ form {
   color: white;
 }
 
+.user {
+  align-items: center;
+  border: none;
+  box-shadow: 0 0 2px black;
+  padding: 0 5px 0 5px;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.user-email {
+  color: rgb(109, 230, 115);
+  text-shadow: 0 1px 10px black;
+}
+
 .main-header__item a:hover,
 .main-header__item a:active,
 .main-header__item a.active {
