@@ -21,12 +21,16 @@ const initAjax = () => {
   const url = '/admin/postUserData';
   const ajax = new XMLHttpRequest();
   ajax.open('POST', url);
-  console.log(url);
   ajax.send();
   ajax.addEventListener('readystatechange', () => {
     const requestSuccess = Boolean(ajax.status === 200 && ajax.readyState === 4);
     if (requestSuccess) {
       const { username, email } = JSON.parse(ajax.responseText);
+        // timeout apenas para teste
+      // setTimeout(() => { 
+      //   userName.innerHTML = username;
+      //   userEmail.innerHTML = email;
+      // }, '3000');
       userName.innerHTML = username;
       userEmail.innerHTML = email;
       return;
