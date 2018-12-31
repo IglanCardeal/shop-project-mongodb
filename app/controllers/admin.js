@@ -83,5 +83,6 @@ exports.postUserData = (req, res, next) => {
     username: username, 
     email: email 
   };
+  res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(userData));
 };

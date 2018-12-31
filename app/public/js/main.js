@@ -3,28 +3,25 @@ const sideDrawer = document.querySelector('.mobile-nav');
 const menuToggle = document.querySelector('#side-menu-toggle');
 const userName = document.querySelector('[data="user-name"]');
 const userEmail = document.querySelector('[data="user-email"]');
-const url = window.location + 'admin/postUserData';
-const ajax = new XMLHttpRequest();
 
 userName.innerHTML = 'carregando';
 userEmail.innerHTML = 'carregando';
 
-ajax.open('POST', url);
-
-function backdropClickHandler() {
+const backdropClickHandler = () => {
   backdrop.style.display = 'none';
   sideDrawer.classList.remove('open');
 }
 
-function menuToggleClickHandler() {
+const menuToggleClickHandler = () => {
   backdrop.style.display = 'block';
   sideDrawer.classList.add('open');
 }
 
-backdrop.addEventListener('click', backdropClickHandler);
-menuToggle.addEventListener('click', menuToggleClickHandler);
-
-document.addEventListener('DOMContentLoaded', () => {
+const initAjax = () => {
+  const url = '/admin/postUserData';
+  const ajax = new XMLHttpRequest();
+  ajax.open('POST', url);
+  console.log(url);
   ajax.send();
   ajax.addEventListener('readystatechange', () => {
     const requestSuccess = Boolean(ajax.status === 200 && ajax.readyState === 4);
@@ -35,4 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
   });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  backdrop.addEventListener('click', backdropClickHandler);
+  menuToggle.addEventListener('click', menuToggleClickHandler);
+  initAjax();
 });
