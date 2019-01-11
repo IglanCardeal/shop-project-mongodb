@@ -24,7 +24,7 @@
                 </a>
             </li>
             <li class="main-header__item user">
-                <a href="#" class="user-name" data="user-name"></a> &nbsp - &nbsp <em class="user-email" data="user-email"></em>
+                <a class="<%= path === '/user' ? 'active' : '' %>" href="#" data="user-name"></a> &nbsp - &nbsp <em class="user-email" data="user-email"></em>
             </li>
         </ul>
     </nav>
@@ -52,8 +52,9 @@
             <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products
             </a>
         </li>
-        <li class="main-header__item user">
-            <a href="#" class="user-name" data="user-name"></a> &nbsp - &nbsp <em class="user-email" data="user-email"></em>
+        <li class="mobile-nav__item">
+            <a class="<%= path === '/user' ? 'active' : '' %>" href="/admin/products" data="mobile-user-name">
+            </a>
         </li>
     </ul>
 </nav>
