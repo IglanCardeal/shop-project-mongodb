@@ -1,14 +1,5 @@
 const Product = require('../models/product');
-
-const errorHandler = (res, msg) => {
-    res.status(500);
-    return res.render('404', { 
-        pageTitle: 'Page Not Found', 
-        path: '404',
-        msg,
-        status: '500 - internal server error!'
-     });
-};
+const { errorHandler } = require('./error-controller');
 
 exports.getIndex = (req, res, next) => {
     const getIndex = async () => {
@@ -96,24 +87,26 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
-    let fetchedCart;
-    // req.user
-    //   .addOrder()
-    //   .then(result => {
-    //     res.redirect('/orders');
-    //   })
-    //   .catch(err => console.log(err));
+    const postOrder = async () => {
+        const result = await req.user.addOrders();
+        if (result === 'failed') {
+            return errorHandler(res, 'Unable to add orders!');
+        }
+        res.redirect('/orders');
+    };
+    postOrder();
 };
 
 exports.getOrders = (req, res, next) => {
-    // req.user
-    //   .getOrders()
-    //   .then(orders => {
-    //     res.render('shop/orders', {
-    //       path: '/orders',
-    //       pageTitle: 'Your Orders',
-    //       orders: orders
-    //     });
-    //   })
-    //   .catch(err => console.log(err));
+    const getOrders = async () => {
+        const orders = await req.user.getOrders();
+        if (orders === 'failed') 
+            return errorHandler(res, 'Unable to get Orders!');
+        res.render('shop/orders', {
+            path: '/orders',
+            pageTitle: 'Your Orders',
+            orders: orders
+        });
+    };
+    getOrders();
 };

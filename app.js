@@ -14,7 +14,7 @@ app.set('views', './app/views');
 
 const adminRoutes = require('./app/routes/admin');
 const shopRoutes = require('./app/routes/shop');
-const errorController = require('./app/controllers/error');
+const errorController = require('./app/controllers/error-controller');
 
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,28 +22,22 @@ app.use(express.static(path.join(__dirname, 'app', 'public')));
 
 // criando um user aleatorio e atribuindo ao req.user
 app.use(async (req, res, next) => {
-    await User.findUserById('5c33f845d44bb6f41bd9af6a')
-        .then(user => {
-            if (user == undefined) {
-                const userData = {
-                    username: 'Cardeal',
-                    email: 'test@email.com',
-                    password: '123',
-                    cart: { items: [] }
-                };
-                const newUser = new User(userData);
-                return newUser.save()
-                    .then(result => {
-                        if (result === 'success')
-                            return ;
-                    }).catch(e => console.log(e));
-            }
-            // console.log(user);
-            req.user = new User(user); // user sera desestruturada no constructor
-            next();
-        })
-        .catch(e => console.log(e));
-    
+    const user = await User.findUserById('5c33f845d44bb6f41bd9af6a');
+    if (user === undefined) {
+        const userData = {
+            username: 'Cardeal',
+            email: 'test@email.com',
+            password: '123',
+            cart: { items: [] }
+        };
+        const newUser = new User(userData);
+        const result = await newUser.save();
+        if (result === 'failed') {
+            return errorController.errorHandler(res, 'Unable to create a new user!');
+        }
+    }
+    req.user = new User(user);
+    next();
 });
 
 app.use('/admin', adminRoutes);
