@@ -1,20 +1,12 @@
-const mongodb = require('mongodb');
-const { MongoClient } = mongodb;
+const mongoose = require('mongoose');
 
-const url = 'mongodb://localhost:27017';
-let _db = null;
-
-exports.dataBaseConnection = async callback => {
-    try {
-        const client = await MongoClient.connect(url, { useNewUrlParser: true });
-        _db = client.db('nodecomplete');
-        return callback();
-    } catch (error) {
-        console.log('Unable to connect database.\n----> Error: ', error);
-        return ;
-    }
+module.exports = async callback => {
+    const url = 'mongodb://localhost:27017';
+    await mongoose.connect(url, {
+        useNewUrlParser: true,
+        dbName: 'nodecomplete'
+    });
+    return callback();
 };
 
-exports.getDataBase = () => {
-    return _db; // retorna a db para ser manipulada
-}
+// OBS: a dbName pode ser especificada na url, como exemplo: 'mongodb://localhost:27017/nodecomplete'

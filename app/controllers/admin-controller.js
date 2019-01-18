@@ -12,15 +12,17 @@ exports.getAddProduct = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
     const userId = req.user._id;
     const getProducts = async () => {
-        const products = await Product.fetchAllProducts(userId);
-        if (products === 'failed') {
+        try {
+            const products = await Product.find({ userId: userId }).exec();
+            return res.render('admin/products', {
+                prods: products,
+                pageTitle: 'Admin Products',
+                path: '/admin/products'
+            });
+        } catch (error) {
+            console.log('-----> Error: ', error);            
             return errorHandler(res, 'Unable to get admin products!');
         }
-        res.render('admin/products', {
-            prods: products,
-            pageTitle: 'Admin Products',
-            path: '/admin/products'
-        });
     };
     getProducts();
 };
@@ -28,13 +30,21 @@ exports.getProducts = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
     const newBook = req.body;
     const userId = req.user._id;
-    const product = new Product(newBook, userId);
+    const product = new Product({
+        title: newBook.title,
+        price: newBook.price,
+        description: newBook.description,
+        imageUrl: newBook.imageUrl,
+        userId: userId
+    });
     const postAddProduct = async () => {
-        const result = await product.save();
-        if (result === 'failed') {
-            return errorHandler(res, 'Unable to save the admin product!');
+        try {
+            await product.save().exec();
+            return res.redirect('/admin/products');
+        } catch (error) {
+            console.log('product created!!!\n', result);
+            return errorHandler(res, 'Unable to save the admin products!');
         }
-        res.redirect('/admin/products');
     };
     postAddProduct();
 };
@@ -42,35 +52,43 @@ exports.postAddProduct = (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
     const { edit } = req.query;
     const { productId } = req.params;
-    const userId = req.user._id;
+    // const userId = req.user._id;
     if (!edit) {
         return res.redirect('/');
     }
     const getEditProduct = async () => {
-        const product = await Product.findProductById(productId, userId);
-        if (product === 'failed') {
-            return errorHandler(res, 'Unable to get the product to edit!');
+        try {
+            const product = await Product.findById(productId).exec();
+            return res.render('admin/edit-product', {
+                pageTitle: 'Edit Product',
+                path: '/admin/edit-product',
+                editing: edit,
+                product: product
+            });
+        } catch (error) {
+            console.log('-----> Error: ', error);
+            return errorHandler(res, 'Unable to get the product to edit');
         }
-        res.render('admin/edit-product', {
-            pageTitle: 'Edit Product',
-            path: '/admin/edit-product',
-            editing: edit,
-            product: product
-        });
     };
     getEditProduct();
 };
 
 exports.postEditProduct = (req, res, next) => {
-    const bookData = req.body;
+    const newBook = req.body;
     const userId = req.user._id;
-    const updatedBook = new Product(bookData, userId);
     const postEditProduct = async () => {
-        const result = await updatedBook.save();
-        if (result === 'failed') {
+        try {
+            const product = await Product.findById(req.body.productId).exec();
+            product.title = newBook.title;
+            product.price = newBook.price;
+            product.description = newBook.description;
+            product.imageUrl = newBook.imageUrl;
+            await product.save();
+            return res.redirect('/admin/products');
+        } catch (error) {
+            console.log('-----> Error: ', error);
             return errorHandler(res, 'Unable to edit the product!');
         }
-        res.redirect('/admin/products');
     };
     postEditProduct();
 };
@@ -79,11 +97,13 @@ exports.postDeleteProduct = (req, res, next) => {
     const { productId } = req.body;
     const userId = req.user._id;
     const postDeleteProduct = async () => {
-        const result = await Product.deleteProductById(productId, userId);
-        if (result === 'failed') {
+        try {
+            await Product.findByIdAndRemove('5c3e876a20f74232a01fcf0b').exec();
+            return res.redirect('/admin/products');
+        } catch (error) {
+            console.log('-----> Error: ', error);
             return errorHandler(res, 'Unable to delete the product!');
         }
-        res.redirect('/admin/products');
     };
     postDeleteProduct();
 };

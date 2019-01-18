@@ -1,32 +1,37 @@
 const Product = require('../models/product');
+const Order = require('../models/order');
 const { errorHandler } = require('./error-controller');
 
 exports.getIndex = (req, res, next) => {
-    const getIndex = async () => {
-        const listOfProducts = await Product.fetchAllProducts();
-        if (listOfProducts === 'failed') {
+    const getIndex = async () => { // try catch ideal agora sera nos controllers e nao nos models
+        try {
+            const products = await Product.find().exec();
+            return res.render('shop/index', {
+                prods: products,
+                pageTitle: 'Shop',
+                path: '/'
+            });
+        } catch (error) {
+            console.log('-----> Error: ', error);
             return errorHandler(res, 'Unable to list products!');
         }
-        res.render('shop/index', {
-            prods: listOfProducts,
-            pageTitle: 'Shop',
-            path: '/'
-        });
     };
     getIndex();
 };
 
 exports.getProducts = (req, res, next) => {
     const getProducts = async () => {
-        const listOfProducts = await Product.fetchAllProducts();
-        if (listOfProducts === 'failed') {
+        try {
+            const products = await Product.find().exec();
+            return res.render('shop/product-list', {
+                prods: products,
+                pageTitle: 'All Products',
+                path: '/products'
+            });
+        } catch (error) {
+            console.log('-----> Error: ', error);
             return errorHandler(res, 'Unable to list products!');
         }
-        res.render('shop/product-list', {
-            prods: listOfProducts,
-            pageTitle: 'All Products',
-            path: '/products'
-        });
     };
     getProducts();
 };
@@ -34,30 +39,35 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
     const { productId } = req.params;
     const getProduct = async () => {
-        const product = await Product.findProductById(productId);
-        if (product === 'failed') {
+        try {
+            const product = await Product.findById(productId).exec();
+            return res.render('shop/product-detail', {
+                product: product,
+                pageTitle: product.title,
+                path: '/products'
+            });
+        } catch (error) {
+            console.log('-----> Error: ', error);
             return errorHandler(res, 'Unable to get the product!');
         }
-        res.render('shop/product-detail', {
-            product: product,
-            pageTitle: product.title,
-            path: '/products'
-        });
     };
     getProduct();
 };
 
 exports.getCart = (req, res, next) => {
     const getCart = async () => {
-        const products = await req.user.getCartProducts();
-        if (products === 'failed') {
+        try {
+            const user = await req.user.populate('cart.items.productId').execPopulate();
+            const products = user.cart.items;
+            return res.render('shop/cart', {
+                path: '/cart',
+                pageTitle: 'Your Cart',
+                products: products
+            });
+        } catch (error) {
+            console.log('-----> Error: ', error);
             return errorHandler(res, 'Unable to get the user cart!');
         }
-        res.render('shop/cart', {
-            path: '/cart',
-            pageTitle: 'Your Cart',
-            products: products
-        });
     };
     getCart();
 };
@@ -65,48 +75,72 @@ exports.getCart = (req, res, next) => {
 exports.postCart = (req, res, next) => {
     const { productId } = req.body;
     const postCart = async () => {
-        const result = await req.user.addProductToCart(productId);
-        if (result === 'failed') {
+        try {
+            await req.user.addProductToCart(productId);
+            return res.redirect('/cart');
+        } catch (error) {
+            console.log('-----> Error: ', error);
             return errorHandler(res, 'Unable to add a product to cart!');
         }
-        return res.redirect('/cart');
     };
     postCart();
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
     const productId = req.body.productId;
-    const removeProduct = async () => {
-        const result = await req.user.removeProductFromCart(productId);
-        if (result === 'failed') {
-            return errorHandler(res, 'Unable to delete a product from cart!');
+    const postCartDeleteProduct = async () => {
+        try {
+            await req.user.removeProductFromCart(productId);
+            return res.redirect('/cart');
+        } catch (error) {
+            console.log('-----> Error: ', error);
+            return errorHandler(res, 'Unable to delete the product from cart!');
         }
-        res.redirect('/cart');
     };
-    removeProduct();
+    postCartDeleteProduct();
 };
 
 exports.postOrder = (req, res, next) => {
     const postOrder = async () => {
-        const result = await req.user.addOrders();
-        if (result === 'failed') {
+        try {
+            const user = await req.user.populate('cart.items.productId').execPopulate();
+            const cartProducts = user.cart.items.map(item => {
+                return {
+                    product: { ...item.productId._doc }, // extrai todos os dados do documento para este novo objeto
+                    quantity: item.quantity
+                }
+            });
+            const order = new Order({
+                user: {
+                    username: req.user.username,
+                    userId: req.user._id
+                },
+                products: cartProducts
+            });
+            await order.save();
+            await req.user.clearCart();
+            return res.redirect('/orders');
+        } catch (error) {
+            console.log('-----> Error: ', error);
             return errorHandler(res, 'Unable to add orders!');
         }
-        res.redirect('/orders');
     };
     postOrder();
 };
 
 exports.getOrders = (req, res, next) => {
     const getOrders = async () => {
-        const orders = await req.user.getOrders();
-        if (orders === 'failed') 
-            return errorHandler(res, 'Unable to get Orders!');
-        res.render('shop/orders', {
-            path: '/orders',
-            pageTitle: 'Your Orders',
-            orders: orders
-        });
+        try {
+            const userOrders = await Order.find({ 'user.userId': req.user._id }).exec(); 
+            return res.render('shop/orders', {
+                path: '/orders',
+                pageTitle: 'Your Orders',
+                orders: userOrders
+            });
+        } catch (error) {
+            console.log('-----> Error: ', error);
+            return errorHandler(res, 'Unable to get orders!');
+        }
     };
     getOrders();
 };
