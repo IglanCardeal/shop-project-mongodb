@@ -19,7 +19,8 @@
                     <li class="orders__products-item">
                         <%= item.product.title %> (
                         <%= item.quantity %>)</li>
-                    <% }); %>
+                        <% }); %>
+                        <li class="cart_item totalprice_value">Total Price: $<%= order.totalPrice %></li>
                 </ul>
             </li>
             <% }); %>

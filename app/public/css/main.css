@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,700");
 
 * {
   box-sizing: border-box;
@@ -7,7 +7,7 @@
 body {
   padding: 0;
   margin: 0;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 main {
@@ -213,6 +213,7 @@ form {
   background: white;
   border-radius: 3px;
   cursor: pointer;
+  box-shadow: 0 0 1px black;
 }
 
 .btn:hover,
@@ -224,12 +225,43 @@ form {
 .btn.danger {
   color: red;
   border-color: red;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn.primary {
+  border-color: green;
+  color: black;
+  font-weight: bold;
+  padding: 5px;
+  transition: 0.3s;
+}
+
+.btn.warning {
+  border-color: gold;
+  color: black;
+  font-weight: bold;
+  padding: 5px;
+  transition: 0.3s;
 }
 
 .btn.danger:hover,
 .btn.danger:active {
   background: red;
   color: white;
+}
+
+.btn.primary:hover,
+.btn.primary:active {
+  background: green;
+  border: 1px solid black;
+}
+
+.btn.btn.warning:hover,
+.btn.btn.warning:active {
+  background: yellow;
+  border: 1px solid black;
+  color: black;
 }
 
 @media (min-width: 768px) {

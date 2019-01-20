@@ -1,38 +1,36 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const productSchema = new Schema({
-    title: {
-        type: String,
-        required: true
-    },
-    price: {
-        type: Number,
-        required: true
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    imageUrl: {
-        type: String,
-        required: true
-    },
-    userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User', // referencia ao model User
-        required: true
-    }
+  title: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  imageUrl: {
+    type: String,
+    required: true
+  },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User", // referencia ao model User
+    required: true
+  }
 });
 
-module.exports = mongoose.model('Product', productSchema); // mongoose ira criar a collection 'products' - lowercase e plural
-
+module.exports = mongoose.model("Product", productSchema); // mongoose ira criar a collection 'products' - lowercase e plural
 
 // const mongodb = require('mongodb');
 // const { ObjectId } = mongodb;
 // const { getDataBase } = require('../../database/connection');
 // const db = getDataBase;
-
 
 // module.exports = class Product {
 //     constructor({ title, price, description, imageUrl, productId }, userId) {
