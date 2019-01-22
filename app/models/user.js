@@ -1,6 +1,14 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+// *************************************************************
+// Model de usuarios.
+// Contem os seguintes metodos personalizados:
+//  - addProductToCart()
+//  - removeProductToCart()
+//  - clearCart()
+// *************************************************************
+
 const userSchema = new Schema({
   username: {
     type: String,
@@ -20,7 +28,8 @@ const userSchema = new Schema({
         productId: {
           type: Schema.Types.ObjectId, // guarda um ObjectId referencia de a products
           required: true,
-          ref: "Product" // referencia ao model Product, o que indica para o mongoose que quando usarmos .populate(), ele ira fazer um busca
+          ref: "Product"
+          // referencia ao model Product, o que indica para o mongoose que quando usarmos .populate(), ele ira fazer um busca
           // na collection products e trazer os dados relativos ao documento com este id.
         },
         quantity: {
@@ -32,9 +41,10 @@ const userSchema = new Schema({
   }
 });
 
+// Adiciona Product ao Cart
 userSchema.methods.addProductToCart = async function(productId, action = null) {
-  // methos permite criar funcoes personalizadas para o model User
-  const updateCartItems = [...this.cart.items]; // this refere ao schema user pois se usa function
+  // this refere ao schema user pois se usa function
+  const updateCartItems = [...this.cart.items];
   const cartProductIndex = this.cart.items.findIndex(cp => {
     if (cp.productId === undefined) return -1;
     return cp.productId.toString() === productId;
@@ -69,7 +79,7 @@ userSchema.methods.addProductToCart = async function(productId, action = null) {
   }
 };
 
-// implementar um metodo que decrementa em um cada item do carro e criar o botao na view.
+// Remove Product do Cart
 userSchema.methods.removeProductFromCart = async function(productId) {
   const updateCartItems = this.cart.items.filter(item => {
     return item.productId.toString() !== productId.toString();
@@ -79,6 +89,7 @@ userSchema.methods.removeProductFromCart = async function(productId) {
   return;
 };
 
+// Remove e limpa todos os Products do Cart
 userSchema.methods.clearCart = async function() {
   this.cart.items = [];
   await this.save();
