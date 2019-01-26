@@ -1,14 +1,19 @@
+#content {
+  text-align: center;
+}
+
 .cart__item-list {
   list-style: none;
   margin: 0;
   padding: 0;
   margin: auto;
-  width: 50rem;
+  width: 40rem;
   max-width: 90%;
+  text-align: center;
 }
 
 .cart__item {
-  display: flex;
+  display: block;
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
@@ -23,8 +28,95 @@
   margin: 0;
 }
 
+.empty {
+  font-size: 40px;
+  text-align: center;
+}
+
 .price_value {
   font-weight: bold;
   font-size: 1.5rem;
   text-align: center;
+}
+
+.btn.danger {
+  color: red;
+  border-color: red;
+}
+
+.btn.primary {
+  border-color: green;
+  color: black;
+  padding: 5px;
+}
+
+.btn.warning {
+  border-color: gold;
+  color: black;
+  padding: 5px;
+}
+
+.btn.reload {
+  border-color: black;
+  color: rgb(2, 2, 71);
+  padding: 10px;
+  width: 100px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.btn.reload:hover,
+.btn.reload:active {
+  background: rgb(37, 37, 158);
+  color: white;
+}
+
+.btn.primary,
+.btn.warning,
+.btn.danger {
+  font-weight: bold;
+  transition: 0.3s;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 10px;
+  width: 70px;
+}
+
+.btn.danger:hover,
+.btn.danger:active {
+  background: red;
+  color: white;
+}
+
+.btn.primary:hover,
+.btn.primary:active {
+  background: green;
+  border: 1px solid black;
+}
+
+.btn.btn.warning:hover,
+.btn.btn.warning:active {
+  background: yellow;
+  border: 1px solid black;
+  color: black;
+}
+
+.order-div {
+  margin-top: 10px;
+}
+
+.btn.order {
+  padding: 10px;
+  width: 150px;
+}
+
+@media (max-width: 700px) {
+  .btn.primary,
+  .btn.warning,
+  .btn.danger,
+  .btn.reload {
+    width: 100px;
+  }
 }

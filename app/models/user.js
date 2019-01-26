@@ -41,7 +41,7 @@ const userSchema = new Schema({
   }
 });
 
-// Adiciona Product ao Cart
+// Adiciona Product ao Cart e controla a quantidade de products no cart.
 userSchema.methods.addProductToCart = async function(productId, action = null) {
   // this refere ao schema user pois se usa function
   const updateCartItems = [...this.cart.items];

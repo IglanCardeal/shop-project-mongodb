@@ -4,42 +4,13 @@
 
     <body>
         <%- include('../includes/navigation.ejs') %>
-        <main>
-            <% if (products.length > 0) { %>
-                <ul class="cart__item-list">
-                    <% products.forEach(p => { %>
-                        <li class="cart__item">
-                            <h1><%= p.productId.title %></h1>
-                            <h2>Quantity: <%= p.quantity %></h2>
-                            <h2>Price: $<%= p.productId.price %></h2>
-                            <form action="/cart-control-quantity" method="POST">
-                              <input type="hidden" value="<%= p.productId._id %>" name="productId">
-                              <input type="hidden" value="increase" name="control">
-                              <button type="submit" class="btn primary">INCREASE</button>
-                            </form>
-                            <form action="/cart-control-quantity" method="POST">
-                              <input type="hidden" value="<%= p.productId._id %>" name="productId">
-                              <input type="hidden" value="decrease" name="control">
-                              <button type="submit" class="btn warning">DECREASE</button>
-                            </form>
-                            <form action="/cart-delete-item" method="POST">
-                                <input type="hidden" value="<%= p.productId._id %>" name="productId">
-                                <button class="btn danger" type="submit">DELETE</button>
-                            </form>
-                        </li>
-                    <% }) %>
-                    <li class="cart_item price_value">Total Price: $<%= totalPrice %></li>
-                    <input type="hidden" value="<%=totalPrice%>" name="totalPrice">
-                </ul>
-                <hr>
-                <div class="centered">
-                    <form action="/create-order" method="POST">
-                        <button type="submit" class="btn">Order Now!</button>
-                    </form>
-                </div>
-                
-            <% } else { %>
-                <h1>No Products in Cart!</h1>
-            <% } %>
+        <main id="main">
+          <div id="content">
+          </div>
         </main>
+        <script src="/js/cart/cart-control.js"></script>
         <%- include('../includes/end.ejs') %>
+
+
+
+         

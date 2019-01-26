@@ -1,4 +1,5 @@
 const PORT = process.env.PORT || 3000;
+const opn = require("opn");
 const path = require("path");
 const express = require("express");
 const app = express();
@@ -27,7 +28,7 @@ app.use(helmet());
 // or complex algorithm for deep parsing that can deal with nested objects (i.e. true).
 app.use(bodyParser.urlencoded({ extended: true }));
 // descomentar para quando usar dados em JSON.
-// app.use(bodyParser.json());
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "app", "public")));
 //  -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -63,5 +64,11 @@ dataBaseConnection(async () => {
     await user.save();
   }
   console.log("Connection to MongoDB stablished with success!");
-  app.listen(PORT, () => console.log(`Server On - PORT ${PORT}`));
+  app.listen(PORT, () => {
+    setTimeout(() => {
+      // ativar o opn quando projeto estiver concluido.
+      // opn(`http://localhost:${PORT}/`, { app: "firefox" });
+    }, 1000);
+    console.log(`Server On - PORT ${PORT}`);
+  });
 });

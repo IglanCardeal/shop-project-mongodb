@@ -57,19 +57,9 @@ exports.getProduct = (req, res, next) => {
 exports.getCart = (req, res, next) => {
   const getCart = async () => {
     try {
-      const user = await req.user
-        .populate("cart.items.productId")
-        .execPopulate();
-      const products = user.cart.items;
-      let totalPrice = 0;
-      products.forEach(order => {
-        totalPrice += order.quantity * order.productId.price;
-      });
       return res.render("shop/cart", {
         path: "/cart",
-        pageTitle: "Your Cart",
-        products: products,
-        totalPrice
+        pageTitle: "Your Cart"
       });
     } catch (error) {
       console.log("-----> Error: ", error);
@@ -77,6 +67,42 @@ exports.getCart = (req, res, next) => {
     }
   };
   getCart();
+};
+
+exports.ajaxGetCart = (req, res, next) => {
+  const ajaxGetCart = async () => {
+    try {
+      const user = await req.user
+        .populate("cart.items.productId")
+        .execPopulate();
+      const products = user.cart.items;
+      const productsData = [];
+      const idsArray = [];
+      let totalPrice = 0;
+      products.forEach(order => {
+        totalPrice += order.quantity * order.productId.price;
+        idsArray.push(order.productId._id);
+        productsData.push({
+          data: order.productId,
+          quantity: order.quantity
+        });
+      });
+      const jsonData = {
+        idsArray: idsArray,
+        productsData: productsData,
+        totalPrice: totalPrice
+      };
+      return res.send(JSON.stringify(jsonData));
+    } catch (error) {
+      console.log("-----> Error: ", error);
+      return res.status(500).json({
+        title: "Server Error",
+        msg: "Unable to get the products in cart!",
+        status: "500 - internal server error!"
+      });
+    }
+  };
+  ajaxGetCart();
 };
 
 exports.postCart = (req, res, next) => {
@@ -94,15 +120,23 @@ exports.postCart = (req, res, next) => {
 };
 
 exports.postCartControlQuantity = (req, res, next) => {
-  const action = req.body.control;
-  const productId = req.body.productId;
   const postCartControlQuantity = async () => {
     try {
-      await req.user.addProductToCart(productId, action);
-      return res.redirect("/cart");
+      const { action, productId } = req.body;
+      if (action === "increase" || action === "decrease") {
+        await req.user.addProductToCart(productId, action);
+      }
+      if (action === "delete") {
+        await req.user.removeProductFromCart(productId);
+      }
+      return res.status(200).json();
     } catch (error) {
       console.log("-----> Error: ", error);
-      return errorHandler(res, "Unable to add a product to cart!");
+      return res.status(500).json({
+        title: "Server Error",
+        msg: "Unable to get the products in cart!",
+        status: "500 - internal server error!"
+      });
     }
   };
   postCartControlQuantity();
@@ -161,7 +195,6 @@ exports.getOrders = (req, res, next) => {
       const userOrders = await Order.find({
         "user.userId": req.user._id
       }).exec();
-      console.log(userOrders);
       return res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
