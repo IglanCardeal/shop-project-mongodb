@@ -1,5 +1,5 @@
 const PORT = process.env.PORT || 3000;
-const opn = require("opn");
+// const opn = require("opn");
 const path = require("path");
 const express = require("express");
 const app = express();
