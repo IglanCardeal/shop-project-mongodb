@@ -9,6 +9,9 @@
   </form>
 */
 
+// OBS: este arquivo utiliza o recurso async/await do JavaScript utilizado nos eventos dos inputs, 
+// logo este arquivo pode nao ser operacional em navegadores que nao suportam recursos atuais do JavaScript.
+
 ("use strict");
 
 const init = () => {
@@ -118,17 +121,6 @@ const init = () => {
   }
 
   function setEventsToInputs() {
-    // // evento para o botao order now!.
-    // const $orderBtn = document.querySelector('[data="order"]');
-    // $orderBtn.addEventListener("click", event => {
-    //   event.preventDefault();
-    //   // alert("Order Clicked");
-    //   console.log("reset!");
-    //   ajaxGetCart();
-    // });
-    // adiciona eventos para os inputs: more, less e delete baseado nos ids.
-    // para os eventos, devemos enviar um json com o id do product e a action.
-    // tipo de actions: 'increase', 'decrease' e 'delete'.
     // --------------------------- more --------------------------------------
     idsArray.forEach(id => {
       const $more = document.querySelector(`[more="${id}"]`);
