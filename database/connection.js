@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 
+const HOST = process.env.DB_HOST;
+const PORT = process.env.DB_PORT;
+const DBNAME = process.env.DB_NAME;
+
 module.exports = async callback => {
-    const url = 'mongodb://localhost:27017';
+    const url = `mongodb://${HOST}:${PORT}/${DBNAME}`;
     await mongoose.connect(url, {
         useNewUrlParser: true,
-        dbName: 'nodecomplete'
     });
     return callback();
 };
-
-// OBS: a dbName pode ser especificada na url, como exemplo: 'mongodb://localhost:27017/nodecomplete'

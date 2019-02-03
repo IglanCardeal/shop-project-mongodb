@@ -8,15 +8,17 @@ exports.get404 = (req, res, next) => {
     pageTitle: "Page Not Found",
     path: "/404",
     msg: "Unable to find the page",
-    status: "404 - not found!"
+    status: "404 - not found!",
+    isAuthenticated: req.session.isLoggedIn
   });
 };
 
-exports.errorHandler = (res, msg) => {
+exports.errorHandler = (res, msg, req = { session: {} }) => {
   return res.status(500).render("404", {
     pageTitle: "Server Error",
     path: "",
     msg,
-    status: "500 - internal server error!"
+    status: "500 - internal server error!",
+    isAuthenticated: req.session.isLoggedIn
   });
 };

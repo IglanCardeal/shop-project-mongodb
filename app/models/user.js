@@ -26,7 +26,7 @@ const userSchema = new Schema({
     items: [
       {
         productId: {
-          type: Schema.Types.ObjectId, // guarda um ObjectId referencia de a products
+          type: Schema.Types.ObjectId, // guarda um ObjectId referencia a products
           required: true,
           ref: "Product"
           // referencia ao model Product, o que indica para o mongoose que quando usarmos .populate(), ele ira fazer um busca

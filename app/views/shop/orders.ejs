@@ -1,30 +1,36 @@
 <%- include('../includes/head.ejs') %>
-<link rel="stylesheet" href="/css/orders.css">
+  <link rel="stylesheet" href="/css/orders.css">
+  <style>
+    .empty {
+      display: block;
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
     <%- include('../includes/navigation.ejs') %>
     <main>
         <% if (orders.length <= 0) { %>
-        <h1>Nothing there!</h1>
+          <h1 class="empty">Nothing there!</h1>
         <% } else { %>
-        <ul class="orders">
-            <% orders.forEach(order => { %>
-            <li class="orders__item">
-                <h1>Order - #
-                    <%= order._id %>
-                </h1>
-                <ul class="orders__products">
-                    <% order.products.forEach(item => { %>
-                    <li class="orders__products-item">
-                        <%= item.product.title %> (
-                        <%= item.quantity %>)</li>
-                        <% }); %>
-                        <li class="cart_item totalprice_value">Total Price: $<%= order.totalPrice %></li>
-                </ul>
-            </li>
-            <% }); %>
-        </ul>
+          <ul class="orders">
+              <% orders.forEach(order => { %>
+              <li class="orders__item">
+                  <h1>Order - #
+                      <%= order._id %>
+                  </h1>
+                  <ul class="orders__products">
+                      <% order.products.forEach(item => { %>
+                      <li class="orders__products-item">
+                          <%= item.product.title %> (
+                          <%= item.quantity %>)</li>
+                          <% }); %>
+                      <li class="cart_item totalprice_value">Total Price: $<%= order.totalPrice %></li>
+                  </ul>
+              </li>
+              <% }); %>
+          </ul>
         <% } %>
     </main>
     <%- include('../includes/end.ejs') %>

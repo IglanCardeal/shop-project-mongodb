@@ -9,7 +9,8 @@ exports.getIndex = (req, res, next) => {
       return res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
-        path: "/"
+        path: "/",
+        isAuthenticated: req.session.isLoggedIn
       });
     } catch (error) {
       console.log("-----> Error: ", error);
@@ -26,7 +27,8 @@ exports.getProducts = (req, res, next) => {
       return res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
-        path: "/products"
+        path: "/products",
+        isAuthenticated: req.session.isLoggedIn
       });
     } catch (error) {
       console.log("-----> Error: ", error);
@@ -44,7 +46,8 @@ exports.getProduct = (req, res, next) => {
       return res.render("shop/product-detail", {
         product: product,
         pageTitle: product.title,
-        path: "/products"
+        path: "/products",
+        isAuthenticated: req.session.isLoggedIn
       });
     } catch (error) {
       console.log("-----> Error: ", error);
@@ -55,18 +58,11 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  const getCart = async () => {
-    try {
-      return res.render("shop/cart", {
-        path: "/cart",
-        pageTitle: "Your Cart"
-      });
-    } catch (error) {
-      console.log("-----> Error: ", error);
-      return errorHandler(res, "Unable to get the user cart!");
-    }
-  };
-  getCart();
+  return res.render("shop/cart", {
+    path: "/cart",
+    pageTitle: "Your Cart",
+    isAuthenticated: req.session.isLoggedIn
+  });
 };
 
 exports.ajaxGetCart = (req, res, next) => {
@@ -198,7 +194,8 @@ exports.getOrders = (req, res, next) => {
       return res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
-        orders: userOrders
+        orders: userOrders,
+        isAuthenticated: req.session.isLoggedIn
       });
     } catch (error) {
       console.log("-----> Error: ", error);

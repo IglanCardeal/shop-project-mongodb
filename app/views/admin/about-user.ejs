@@ -1,0 +1,40 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/forms.css">
+    <style>
+      .about-user {
+        display: block;
+        font-size: 1.5rem;
+        margin: 10px;
+        margin-top: 10%;
+        text-align: center;
+        text-shadow: 0 1px 1px black;
+      }
+
+      .field {
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-right: 20px;
+      }
+    </style>
+</head>
+
+<body>
+  <%- include('../includes/navigation.ejs') %>
+  
+    <main>
+      <div class="about-user">
+        <div>
+          <label for="username" class="field">Name: </label>
+          <span id="username"><%= userData.username %></span>
+        </div>
+        <div>
+            <label for="email" class="field">Email: </label>
+            <span id="email"><%= userData.email %></span>
+        </div>
+        <div>
+          <label for="cart" class="field">Cart: </label>
+          <span id="cart"><%= productsInCart %></span>
+        </div>
+      </div>
+    </main>
+<%- include('../includes/end.ejs') %>

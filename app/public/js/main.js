@@ -7,33 +7,36 @@ const userName = document.querySelector('[data="user-name"]');
 const userEmail = document.querySelector('[data="user-email"]');
 const mobileUserName = document.querySelector('[data="mobile-user-name"]');
 
-userName.innerHTML = "carregando";
-userEmail.innerHTML = "carregando";
-mobileUserName.innerHTML = "carregando";
-
 const initAjax = isMobile => {
-  const url = "/admin/postUserData";
-  const ajax = new XMLHttpRequest();
-  ajax.open("POST", url);
-  ajax.send();
-  ajax.addEventListener("readystatechange", () => {
-    const requestSuccess = Boolean(
-      ajax.status === 200 && ajax.readyState === 4
-    );
-    if (requestSuccess) {
-      const { username, email } = JSON.parse(ajax.responseText);
-      // timeout apenas para teste
-      // setTimeout(() => {
-      //   mobileUserName.innerHTML = username;
-      //   userName.innerHTML = username;
-      //   userEmail.innerHTML = email;
-      // }, '3000');
-      mobileUserName.innerHTML = username;
-      userName.innerHTML = username;
-      userEmail.innerHTML = email;
-      return;
-    }
-  });
+  if (userName != undefined) {
+    userName.innerHTML = "carregando";
+    userEmail.innerHTML = "carregando";
+    mobileUserName.innerHTML = "carregando";
+    const url = "/admin/postUserData";
+    const ajax = new XMLHttpRequest();
+    ajax.open("POST", url);
+    ajax.send();
+    ajax.addEventListener("readystatechange", () => {
+      const requestSuccess = Boolean(
+        ajax.status === 200 && ajax.readyState === 4
+      );
+      if (requestSuccess) {
+        const { username, email } = JSON.parse(ajax.responseText);
+        // timeout apenas para teste
+        // setTimeout(() => {
+        //   mobileUserName.innerHTML = username;
+        //   userName.innerHTML = username;
+        //   userEmail.innerHTML = email;
+        // }, '3000');
+        mobileUserName.innerHTML = username;
+        userName.innerHTML = username;
+        userEmail.innerHTML = email;
+        return;
+      }
+    });
+  } else {
+    return null;
+  }
 };
 
 const backdropClickHandler = () => {

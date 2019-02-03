@@ -9,6 +9,9 @@
   </form>
 */
 
+// OBS: este arquivo utiliza o recurso async/await do JavaScript utilizado nos eventos dos inputs,
+// logo este arquivo pode nao ser operacional em navegadores que nao suportam recursos atuais do JavaScript.
+
 ("use strict");
 
 const init = () => {
@@ -92,20 +95,20 @@ const init = () => {
 
   // faz a chamada ajax para a API que controla os products no cart.
   function setControlOverCart(action, id) {
-    const ajaxControl = new XMLHttpRequest();
-    ajaxControl.open("POST", "/cart-control-quantity");
-    ajaxControl.setRequestHeader("Content-Type", "application/json");
+    const ajaxControlCart = new XMLHttpRequest();
+    ajaxControlCart.open("POST", "/cart-control-quantity");
+    ajaxControlCart.setRequestHeader("Content-Type", "application/json");
     const jsonData = {
       action: action,
       productId: id
     };
-    ajaxControl.send(JSON.stringify(jsonData));
-    ajaxControl.addEventListener("readystatechange", () => {
+    ajaxControlCart.send(JSON.stringify(jsonData));
+    ajaxControlCart.addEventListener("readystatechange", () => {
       const requestFailed = Boolean(
-        ajaxControl.status === 500 && ajaxControl.readyState === 4
+        ajaxControlCart.status === 500 && ajaxControlCart.readyState === 4
       );
       const requestSuccess = Boolean(
-        ajaxControl.status === 200 && ajaxControl.readyState === 4
+        ajaxControlCart.status === 200 && ajaxControlCart.readyState === 4
       );
       if (requestSuccess) {
         return ajaxGetCart();
@@ -118,17 +121,6 @@ const init = () => {
   }
 
   function setEventsToInputs() {
-    // // evento para o botao order now!.
-    // const $orderBtn = document.querySelector('[data="order"]');
-    // $orderBtn.addEventListener("click", event => {
-    //   event.preventDefault();
-    //   // alert("Order Clicked");
-    //   console.log("reset!");
-    //   ajaxGetCart();
-    // });
-    // adiciona eventos para os inputs: more, less e delete baseado nos ids.
-    // para os eventos, devemos enviar um json com o id do product e a action.
-    // tipo de actions: 'increase', 'decrease' e 'delete'.
     // --------------------------- more --------------------------------------
     idsArray.forEach(id => {
       const $more = document.querySelector(`[more="${id}"]`);
@@ -188,9 +180,10 @@ const init = () => {
     // loop para renderizar todos os products no cart.
     productsData.forEach(product => {
       const $li = document.createElement("li");
-      const $h1 = document.createElement("h1");
-      const $h2Qty = document.createElement("h2");
-      const $h2Price = document.createElement("h2");
+      const $title = document.createElement("h1");
+      const $img = document.createElement("img");
+      const $quantity = document.createElement("h2");
+      const $price = document.createElement("h2");
       const $inputMore = document.createElement("input");
       const $inputLess = document.createElement("input");
       const $inputDelete = document.createElement("input");
@@ -198,9 +191,13 @@ const init = () => {
 
       $li.setAttribute("class", "cart__item");
 
-      $h1.textContent = `${product.data.title}`;
-      $h2Qty.textContent = `Quantity: ${product.quantity}`;
-      $h2Price.textContent = `Price: ${product.data.price}`;
+      // img do product.
+      $img.setAttribute("src", product.data.imageUrl);
+      $img.setAttribute("class", "product-img");
+
+      $title.textContent = `${product.data.title}`;
+      $quantity.textContent = `Quantity: ${product.quantity}`;
+      $price.textContent = `Price: $${product.data.price}`;
 
       // cria os inputs para more, less e delete.
       $inputMore.setAttribute("class", "btn primary");
@@ -222,10 +219,12 @@ const init = () => {
       $inputForm.appendChild($inputDelete);
 
       // adiciona na li os dados do product, inputs e depois inseri na ul.
-      $li.appendChild($h1);
+      $li.appendChild($title);
       $li.appendChild(document.createElement("hr"));
-      $li.appendChild($h2Qty);
-      $li.appendChild($h2Price);
+      $li.appendChild($img);
+      $li.appendChild(document.createElement("hr"));
+      $li.appendChild($quantity);
+      $li.appendChild($price);
       $li.appendChild($inputForm);
       $ul.appendChild($li);
     });

@@ -2,3 +2,5 @@ node_modules
 *.log
 backup
 .vscode
+.env
+wrap-up.js
