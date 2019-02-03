@@ -5,8 +5,7 @@ exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
-    editing: false,
-    isAuthenticated: req.session.isLoggedIn
+    editing: false
   });
 };
 
@@ -19,7 +18,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
-        isAuthenticated: req.session.isLoggedIn
+        error: req.flash("error")
       });
     } catch (error) {
       console.log("-----> Error: ", error);
@@ -65,8 +64,7 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: edit,
-        product: product,
-        isAuthenticated: req.session.isLoggedIn
+        product: product
       });
     } catch (error) {
       console.log("-----> Error: ", error);
@@ -86,7 +84,10 @@ exports.postEditProduct = (req, res, next) => {
       const productBelongsToUser = Boolean(
         product.userId.toString() === userId.toString()
       );
-      if (!productBelongsToUser) return res.redirect("/admin/products");
+      if (!productBelongsToUser) {
+        req.flash("error", "The product do not belongs to you!");
+        return res.redirect("/admin/products");
+      }
       product.title = newBook.title;
       product.price = newBook.price;
       product.description = newBook.description;
@@ -121,8 +122,8 @@ exports.postDeleteProduct = (req, res, next) => {
 
 // Sobre o admin-user, adicionar funcionalidade de editar email, nome e redefinir senha.
 exports.getUser = (req, res, next) => {
-  const userData = req.user;
-  const qtyInCart = req.user.cart.items.length;
+  const { username, email, cart } = req.user;
+  const qtyInCart = cart.items.length;
   let productsInCart = "";
   if (qtyInCart === 0) productsInCart = `No products in cart.`;
   productsInCart = `${qtyInCart} products on cart.`;
@@ -130,9 +131,8 @@ exports.getUser = (req, res, next) => {
     pageTitle: "Your Data",
     path: "/user",
     editing: false,
-    userData: userData,
-    productsInCart: productsInCart,
-    isAuthenticated: req.session.isLoggedIn
+    userData: { username, email },
+    productsInCart: productsInCart
   });
 };
 
@@ -141,8 +141,7 @@ exports.postUserData = (req, res, next) => {
     try {
       const { username, email } = req.user;
       const userData = {
-        username: username,
-        email: email
+        username: username
       };
       res.setHeader("Content-Type", "application/json");
       res.send(JSON.stringify(userData));

@@ -58,10 +58,9 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  return res.render("shop/cart", {
+  res.render("shop/cart", {
     path: "/cart",
-    pageTitle: "Your Cart",
-    isAuthenticated: req.session.isLoggedIn
+    pageTitle: "Your Cart"
   });
 };
 
@@ -152,6 +151,25 @@ exports.postCartDeleteProduct = (req, res, next) => {
   postCartDeleteProduct();
 };
 
+exports.getOrders = (req, res, next) => {
+  const getOrders = async () => {
+    try {
+      const userOrders = await Order.find({
+        "user.userId": req.user._id
+      }).exec();
+      return res.render("shop/orders", {
+        path: "/orders",
+        pageTitle: "Your Orders",
+        orders: userOrders
+      });
+    } catch (error) {
+      console.log("-----> Error: ", error);
+      return errorHandler(res, "Unable to get orders!");
+    }
+  };
+  getOrders();
+};
+
 exports.postOrder = (req, res, next) => {
   const postOrder = async () => {
     try {
@@ -168,7 +186,7 @@ exports.postOrder = (req, res, next) => {
       });
       const order = new Order({
         user: {
-          username: req.user.username,
+          email: req.user.email,
           userId: req.user._id
         },
         totalPrice: totalPrice,
@@ -183,24 +201,4 @@ exports.postOrder = (req, res, next) => {
     }
   };
   postOrder();
-};
-
-exports.getOrders = (req, res, next) => {
-  const getOrders = async () => {
-    try {
-      const userOrders = await Order.find({
-        "user.userId": req.user._id
-      }).exec();
-      return res.render("shop/orders", {
-        path: "/orders",
-        pageTitle: "Your Orders",
-        orders: userOrders,
-        isAuthenticated: req.session.isLoggedIn
-      });
-    } catch (error) {
-      console.log("-----> Error: ", error);
-      return errorHandler(res, "Unable to get orders!");
-    }
-  };
-  getOrders();
 };

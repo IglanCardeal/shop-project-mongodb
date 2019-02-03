@@ -42,7 +42,8 @@ form {
 
 .main-header__nav {
   height: 100%;
-  display: flex;
+  width: 100%;
+  display: none;
   align-items: center;
   justify-content: space-between;
 }
@@ -59,30 +60,21 @@ form {
   padding: 0;
 }
 
-.main-header__item a {
+.main-header__item a,
+.main-header__item button {
+  font: inherit;
+  background: transparent;
+  border: none;
   text-decoration: none;
   color: white;
-}
-
-.user {
-  align-items: center;
-  border: none;
-  box-shadow: 0 0 2px black;
-  padding: 0 5px 0 5px;
-}
-
-.user-name {
-  font-weight: bold;
-}
-
-.user-email {
-  color: rgb(109, 230, 115);
-  text-shadow: 0 1px 10px black;
+  cursor: pointer;
 }
 
 .main-header__item a:hover,
 .main-header__item a:active,
-.main-header__item a.active {
+.main-header__item a.active,
+.main-header__item button:hover,
+.main-header__item button:active {
   color: #ffeb3b;
 }
 
@@ -176,6 +168,7 @@ form {
   justify-content: space-around;
   align-items: stretch;
 }
+
 .card {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
 }
@@ -212,7 +205,7 @@ form {
 
 .btn {
   display: inline-block;
-  padding: 0.25rem;
+  padding: 0.25rem 1rem;
   text-decoration: none;
   font: inherit;
   border: 1px solid #00695c;
@@ -220,7 +213,6 @@ form {
   background: white;
   border-radius: 3px;
   cursor: pointer;
-  box-shadow: 0 0 1px black;
 }
 
 .btn:hover,
@@ -229,15 +221,15 @@ form {
   color: white;
 }
 
-.logout {
-  border: none;
-  background-color: rgba(0, 0, 0, 0);
-  color: white;
+.btn.danger {
+  color: red;
+  border-color: red;
 }
 
-.logout:hover {
-  cursor: pointer;
-  color: rgb(109, 230, 115);
+.btn.danger:hover,
+.btn.danger:active {
+  background: red;
+  color: white;
 }
 
 @media (min-width: 768px) {

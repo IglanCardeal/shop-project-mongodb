@@ -12,6 +12,8 @@ const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const session = require("express-session");
 const SessionStore = require("connect-mongodb-session")(session);
+const csrf = require("csurf");
+const flash = require("connect-flash");
 // const opn = require("opn");
 
 // Setup do app e armazenamento das sessoes.
@@ -20,6 +22,12 @@ const sessionDataBase = new SessionStore({
   uri: MONGODB_URL,
   collection: "session"
 });
+
+// Rotas.
+const adminRoutes = require("./app/routes/admin");
+const shopRoutes = require("./app/routes/shop");
+const authRoutes = require("./app/routes/auth");
+const errorController = require("./app/controllers/error-controller");
 
 // DataBase connection file.
 const dataBaseConnection = require(path.resolve("database", "connection"));
@@ -30,12 +38,6 @@ const User = require("./app/models/user");
 // Setup das engines e views.
 app.set("view engine", "ejs");
 app.set("views", "./app/views");
-
-// Rotas.
-const adminRoutes = require("./app/routes/admin");
-const shopRoutes = require("./app/routes/shop");
-const authRoutes = require("./app/routes/auth");
-const errorController = require("./app/controllers/error-controller");
 
 // Middlewares.
 app.use(helmet());
@@ -50,6 +52,8 @@ app.use(
     store: sessionDataBase
   })
 );
+app.use(csrf());
+app.use(flash());
 app.use(async (req, res, next) => {
   if (!req.session.userId) {
     return next();
@@ -57,6 +61,13 @@ app.use(async (req, res, next) => {
   const user = await User.findById(req.session.userId);
   if (!user) return res.redirect("/login");
   req.user = user;
+  next();
+});
+app.use((req, res, next) => {
+  // res.locals permite atribuir propriedades que serao passadas para todas as views
+  // que forem renderizadas.
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
   next();
 });
 

@@ -40,7 +40,6 @@
           href="/admin/about-user"
           data="user-name"
         ></a>
-        &nbsp - &nbsp <em class="user-email" data="user-email"></em>
       </li>
       <% } %>
     </ul>
@@ -59,7 +58,8 @@
       <% } else { %>
       <li class="main-header__item">
         <form action="/logout" method="POST">
-          <button type="submit" class="logout">Logout</button>
+          <button type="submit" class="logout">Logout</button> <%-
+          include('../includes/csrf-token.ejs') %>
         </form>
       </li>
       <% } %>
@@ -122,7 +122,8 @@
     <% } else { %>
     <li class="mobile-nav__item">
       <form action="/logout" method="post">
-        <button type="submit">Logout</button>
+        <button type="submit">Logout</button> <%-
+        include('../includes/csrf-token.ejs') %>
       </form>
     </li>
     <% } %>

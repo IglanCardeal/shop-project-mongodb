@@ -16,6 +16,7 @@
 
 const init = () => {
   const $main = document.querySelector("#main");
+  const token = document.querySelector('[data="token"]').value;
   const ajax = new XMLHttpRequest();
 
   // atributos para o resultado da chamada AJAX.
@@ -29,7 +30,12 @@ const init = () => {
     // relacionada ao evento do input.
     const url = "/ajax-get-cart";
     ajax.open("POST", url);
-    ajax.send();
+    ajax.setRequestHeader("Content-Type", "application/json");
+    ajax.send(
+      JSON.stringify({
+        _csrf: token
+      })
+    );
     ajax.addEventListener("readystatechange", () => {
       const requestFailed = Boolean(
         ajax.status === 500 && ajax.readyState === 4
@@ -99,6 +105,7 @@ const init = () => {
     ajaxControlCart.open("POST", "/cart-control-quantity");
     ajaxControlCart.setRequestHeader("Content-Type", "application/json");
     const jsonData = {
+      _csrf: token,
       action: action,
       productId: id
     };
@@ -167,14 +174,19 @@ const init = () => {
     const $orderDiv = document.createElement("div");
     const $orderForm = document.createElement("form");
     const $orderButton = document.createElement("button");
+    const $token = document.createElement("input");
     $orderDiv.setAttribute("class", "centered order-div");
     $orderForm.setAttribute("action", "/create-order");
     $orderForm.setAttribute("method", "POST");
+    $token.setAttribute("type", "hidden");
+    $token.setAttribute("name", "_csrf");
+    $token.setAttribute("value", token);
     $orderButton.setAttribute("type", "submit");
     $orderButton.setAttribute("class", "btn order");
     $orderButton.setAttribute("data", "order");
     $orderButton.textContent = "Order Now!";
     $orderForm.appendChild($orderButton);
+    $orderForm.appendChild($token);
     $orderDiv.appendChild($orderForm);
 
     // loop para renderizar todos os products no cart.

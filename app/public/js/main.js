@@ -4,33 +4,30 @@ const backdrop = document.querySelector(".backdrop");
 const sideDrawer = document.querySelector(".mobile-nav");
 const menuToggle = document.querySelector("#side-menu-toggle");
 const userName = document.querySelector('[data="user-name"]');
-const userEmail = document.querySelector('[data="user-email"]');
 const mobileUserName = document.querySelector('[data="mobile-user-name"]');
+const token = document.querySelector('[data="token"]').value;
 
 const initAjax = isMobile => {
   if (userName != undefined) {
     userName.innerHTML = "carregando";
-    userEmail.innerHTML = "carregando";
     mobileUserName.innerHTML = "carregando";
     const url = "/admin/postUserData";
     const ajax = new XMLHttpRequest();
     ajax.open("POST", url);
-    ajax.send();
+    ajax.setRequestHeader("Content-Type", "application/json");
+    ajax.send(
+      JSON.stringify({
+        _csrf: token
+      })
+    );
     ajax.addEventListener("readystatechange", () => {
       const requestSuccess = Boolean(
         ajax.status === 200 && ajax.readyState === 4
       );
       if (requestSuccess) {
-        const { username, email } = JSON.parse(ajax.responseText);
-        // timeout apenas para teste
-        // setTimeout(() => {
-        //   mobileUserName.innerHTML = username;
-        //   userName.innerHTML = username;
-        //   userEmail.innerHTML = email;
-        // }, '3000');
+        const { username } = JSON.parse(ajax.responseText);
         mobileUserName.innerHTML = username;
         userName.innerHTML = username;
-        userEmail.innerHTML = email;
         return;
       }
     });

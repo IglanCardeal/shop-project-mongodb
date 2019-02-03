@@ -30,6 +30,7 @@
             <% } %>
 
             <button class="btn" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>
+            <%- include('../includes/csrf-token.ejs') %>
           </form>
         <% } else {%>
           <h1>You are not logged in!</h1>
