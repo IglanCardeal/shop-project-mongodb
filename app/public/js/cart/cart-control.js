@@ -9,7 +9,11 @@
   </form>
 */
 
+<<<<<<< HEAD
 // OBS: este arquivo utiliza o recurso async/await do JavaScript utilizado nos eventos dos inputs,
+=======
+// OBS: este arquivo utiliza o recurso async/await do JavaScript utilizado nos eventos dos inputs, 
+>>>>>>> 83cf2e4a3a0d83224e85c4c694ecf385a78a0f48
 // logo este arquivo pode nao ser operacional em navegadores que nao suportam recursos atuais do JavaScript.
 
 ("use strict");

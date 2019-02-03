@@ -3,9 +3,13 @@ const checkNodeEnv = require("./check-node-env");
 checkNodeEnv();
 
 const PORT = process.env.PORT || 3000;
+<<<<<<< HEAD
 const MONGODB_URL = `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${
   process.env.DB_NAME
 }`;
+=======
+// const opn = require("opn");
+>>>>>>> 83cf2e4a3a0d83224e85c4c694ecf385a78a0f48
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
