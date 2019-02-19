@@ -3,13 +3,9 @@ const checkNodeEnv = require("./check-node-env");
 checkNodeEnv();
 
 const PORT = process.env.PORT || 3000;
-<<<<<<< HEAD
 const MONGODB_URL = `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${
   process.env.DB_NAME
 }`;
-=======
-// const opn = require("opn");
->>>>>>> 83cf2e4a3a0d83224e85c4c694ecf385a78a0f48
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -36,14 +32,14 @@ const errorController = require("./app/controllers/error-controller");
 // DataBase connection file.
 const dataBaseConnection = require(path.resolve("database", "connection"));
 
-// Models.
-const User = require("./app/models/user");
-
 // Setup das engines e views.
 app.set("view engine", "ejs");
 app.set("views", "./app/views");
 
 // Middlewares.
+const preventCsrf = require("./middleware/prevent-csrf");
+const checkSession = require("./middleware/check-session");
+
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -58,22 +54,8 @@ app.use(
 );
 app.use(csrf());
 app.use(flash());
-app.use(async (req, res, next) => {
-  if (!req.session.userId) {
-    return next();
-  }
-  const user = await User.findById(req.session.userId);
-  if (!user) return res.redirect("/login");
-  req.user = user;
-  next();
-});
-app.use((req, res, next) => {
-  // res.locals permite atribuir propriedades que serao passadas para todas as views
-  // que forem renderizadas.
-  res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
+app.use(checkSession);
+app.use(preventCsrf);
 
 // Setup das rotas.
 app.use("/admin", adminRoutes);

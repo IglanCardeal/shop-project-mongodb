@@ -16,10 +16,12 @@ const userSchema = new Schema({
   },
   email: {
     type: String,
+    lowercase: true,
     required: true
   },
   password: {
     type: String,
+    select: false,
     required: true
   },
   cart: {
