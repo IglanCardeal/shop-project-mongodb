@@ -123,7 +123,7 @@ exports.getUser = (req, res) => {
 
 exports.postUserData = async (req, res) => {
   try {
-    const { username, email } = req.user;
+    const { username } = req.user;
     const userData = {
       username: username
     };

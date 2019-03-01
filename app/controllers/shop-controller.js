@@ -59,22 +59,7 @@ exports.ajaxGetCart = async (req, res) => {
   try {
     const user = await req.user.populate("cart.items.productId").execPopulate();
     const products = user.cart.items;
-    const productsData = [];
-    const idsArray = [];
-    let totalPrice = 0;
-    products.forEach(order => {
-      totalPrice += order.quantity * order.productId.price;
-      idsArray.push(order.productId._id);
-      productsData.push({
-        data: order.productId,
-        quantity: order.quantity
-      });
-    });
-    const jsonData = {
-      idsArray: idsArray,
-      productsData: productsData,
-      totalPrice: totalPrice
-    };
+    const jsonData = getDataFromCart(products);
     return res.send(JSON.stringify(jsonData));
   } catch (error) {
     console.log("-----> Error: ", error);
@@ -118,9 +103,8 @@ exports.postCartControlQuantity = async (req, res) => {
 };
 
 exports.postCartDeleteProduct = async (req, res) => {
-  const productId = req.body.productId;
   try {
-    await req.user.removeProductFromCart(productId);
+    await req.user.removeProductFromCart(req.body.productId);
     return res.redirect("/cart");
   } catch (error) {
     console.log("-----> Error: ", error);
@@ -147,21 +131,13 @@ exports.getOrders = async (req, res) => {
 exports.postOrder = async (req, res) => {
   try {
     const user = await req.user.populate("cart.items.productId").execPopulate();
-    let totalPrice = 0;
-    const cartProducts = user.cart.items.map(item => {
-      totalPrice += item.productId._doc.price * item.quantity;
-      return {
-        product: { ...item.productId._doc }, // extrai todos os dados do documento para este novo objeto
-        quantity: item.quantity
-      };
-    });
     const order = new Order({
       user: {
         email: req.user.email,
         userId: req.user._id
       },
-      totalPrice: totalPrice,
-      products: cartProducts
+      totalPrice: getProductsToOrder(user).totalPrice,
+      products: getProductsToOrder(user).cartProducts
     });
     await order.save();
     await req.user.clearCart();
@@ -170,4 +146,36 @@ exports.postOrder = async (req, res) => {
     console.log("-----> Error: ", error);
     return errorHandler(res, "Unable to add orders!");
   }
+};
+
+const getDataFromCart = products => {
+  const productsData = [];
+  const idsArray = [];
+  let totalPrice = 0;
+  products.forEach(order => {
+    totalPrice += order.quantity * order.productId.price;
+    idsArray.push(order.productId._id);
+    productsData.push({
+      data: order.productId,
+      quantity: order.quantity
+    });
+  });
+  return {
+    idsArray: idsArray,
+    productsData: productsData,
+    totalPrice: totalPrice
+  };
+};
+
+const getProductsToOrder = user => {
+  let totalPrice = 0;
+  let cartProducts = user.cart.items.map(item => {
+    totalPrice += item.productId._doc.price * item.quantity;
+    return {
+      product: { ...item.productId._doc }, // extrai todos os dados do documento relacionado para este novo objeto
+      quantity: item.quantity
+    };
+  });
+
+  return { cartProducts, totalPrice };
 };

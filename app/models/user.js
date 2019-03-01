@@ -40,6 +40,15 @@ const userSchema = new Schema({
         }
       }
     ]
+  },
+  resetToken: {
+    type: String,
+    required: false,
+    default: ""
+  },
+  tokenExpiration: {
+    type: Date,
+    required: false
   }
 });
 
