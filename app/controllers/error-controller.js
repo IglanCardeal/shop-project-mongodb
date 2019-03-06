@@ -1,7 +1,7 @@
-// **************************************
-// Metodos para tratamento de erros de
-// 404 - not found e erros de servidor
-// **************************************
+/**
+ * @errorhandler
+ * Controller para tratamento de erros de servidor (404  & 500)
+ */
 
 exports.get404 = (req, res, next) => {
   return res.status(404).render("404", {

@@ -1,0 +1,27 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/auth.css">
+    <style>
+      .msg {
+        color: rgb(9, 201, 9);
+        font-weight: normal;
+        font-size: 18px;
+        display: block;
+        text-align: center;
+        text-shadow: 0 1px 1px black;
+        text-transform: uppercase;
+        margin-top: 10px;
+      }
+    </style>
+</head>
+
+<body>
+   <%- include('../includes/navigation.ejs') %>
+
+    <main>
+      <span class="error"> <%= msg %> </span>
+      <div class="centered">
+        <a class="btn" href="/login">Go To Login</a>
+      </div>
+    </main>
+<%- include('../includes/end.ejs') %>

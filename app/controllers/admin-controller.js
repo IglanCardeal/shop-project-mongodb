@@ -1,3 +1,9 @@
+/**
+ * @admincontrols
+ * Controle de usuarios cadastrados para editar, adicionar e excluir produtos
+ * e controle de dados da conta.
+ */
+
 const Product = require("../models/product");
 const { errorHandler } = require("./error-controller");
 
@@ -10,7 +16,7 @@ exports.getAddProduct = (req, res) => {
 };
 
 exports.getProducts = async (req, res) => {
-  const userId = req.session.userId;
+  const userId = req.user._id;
   try {
     const products = await Product.find({ userId: userId }).exec();
     return res.render("admin/products", {
@@ -27,7 +33,7 @@ exports.getProducts = async (req, res) => {
 
 exports.postAddProduct = async (req, res) => {
   const newBook = req.body;
-  const userId = req.session.userId;
+  const userId = req.user._id;
   const product = new Product({
     title: newBook.title,
     price: newBook.price,
@@ -47,12 +53,15 @@ exports.postAddProduct = async (req, res) => {
 exports.getEditProduct = async (req, res) => {
   const { edit } = req.query;
   const { productId } = req.params;
-  // const userId = req.session.user._id;
+  const userId = req.user._id;
   if (!edit) {
     return res.redirect("/");
   }
   try {
-    const product = await Product.findById(productId).exec();
+    const product = await Product.findOne({
+      _id: productId,
+      userId: userId
+    }).exec();
     return res.render("admin/edit-product", {
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
@@ -65,17 +74,17 @@ exports.getEditProduct = async (req, res) => {
   }
 };
 
-// O product a ser editado, deve ser filtrado pelo id do user.
 exports.postEditProduct = async (req, res) => {
   const newBook = req.body;
-  const userId = req.session.userId;
+  const userId = req.user._id;
+  const { productId } = req.body;
   try {
-    const product = await Product.findById(req.body.productId).exec();
-    const productBelongsToUser = Boolean(
-      product.userId.toString() === userId.toString()
-    );
-    if (!productBelongsToUser) {
-      req.flash("error", "The product do not belongs to you!");
+    const product = await Product.findOne({
+      _id: productId,
+      userId: userId
+    }).exec();
+    if (!product) {
+      req.flash("error", "The product do not belongs to your account!");
       return res.redirect("/admin/products");
     }
     product.title = newBook.title;
@@ -92,7 +101,7 @@ exports.postEditProduct = async (req, res) => {
 
 exports.postDeleteProduct = async (req, res) => {
   const { productId } = req.body;
-  const userId = req.session.userId;
+  const userId = req.user._id;
   try {
     await Product.findOneAndDelete({
       _id: productId,
@@ -122,19 +131,7 @@ exports.getUser = (req, res) => {
 };
 
 exports.postUserData = async (req, res) => {
-  try {
-    const { username } = req.user;
-    const userData = {
-      username: username
-    };
-    res.setHeader("Content-Type", "application/json");
-    res.send(JSON.stringify(userData));
-  } catch (error) {
-    console.log("Error: ", error);
-    return res.status(500).json({
-      title: "Server Error",
-      msg: "Unable to get user data!",
-      status: "500 - internal server error!"
-    });
-  }
+  const userData = { username: req.user.username };
+  res.setHeader("Content-Type", "application/json");
+  res.send(JSON.stringify(userData));
 };

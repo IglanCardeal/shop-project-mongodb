@@ -1,10 +1,18 @@
+/**
+ * @productsshow
+ * Controller para exibicao de produtos, detalhes de produtos, carrinhos de compras
+ *  e ordem de compra.
+ */
+
 const Product = require("../models/product");
 const Order = require("../models/order");
 const { errorHandler } = require("./error-controller");
 
 exports.getIndex = async (req, res) => {
   try {
-    const products = await Product.find().exec();
+    const products = await Product.find()
+      .select("-userId")
+      .exec();
     return res.render("shop/index", {
       prods: products,
       pageTitle: "Shop",
@@ -19,7 +27,9 @@ exports.getIndex = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find().exec();
+    const products = await Product.find()
+      .select("-userId")
+      .exec();
     return res.render("shop/product-list", {
       prods: products,
       pageTitle: "All Products",
@@ -35,7 +45,9 @@ exports.getProducts = async (req, res) => {
 exports.getProduct = async (req, res) => {
   const { productId } = req.params;
   try {
-    const product = await Product.findById(productId).exec();
+    const product = await Product.findById(productId)
+      .select("-userId")
+      .exec();
     return res.render("shop/product-detail", {
       product: product,
       pageTitle: product.title,
@@ -172,7 +184,8 @@ const getProductsToOrder = user => {
   let cartProducts = user.cart.items.map(item => {
     totalPrice += item.productId._doc.price * item.quantity;
     return {
-      product: { ...item.productId._doc }, // extrai todos os dados do documento relacionado para este novo objeto
+      // '._doc' extrai todos os dados do documento relacionado.
+      product: { ...item.productId._doc },
       quantity: item.quantity
     };
   });

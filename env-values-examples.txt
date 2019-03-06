@@ -1,0 +1,21 @@
+User este exemplo para se guiar e definir as variaveis de ambiente do projeto.
+
+APP_NAME= The Online Shop Project
+APP_AUTHOR= Iglan Cardeal
+APP_EMAIL= online-shop@project.com
+APP_URL= http://localhost:
+
+# Enviroment
+NODE_ENV= development
+PORT= defina a porta do servidor local
+
+# DATABASE
+DB_NAME= nome da base de dados
+DB_HOST= host do banco
+DB_PORT= porta do banco
+DB_USERNAME= nome de usuario
+DB_PASSWORD= senha de usuario do banco
+
+# SendGrid account API key
+# Ao criar conta em https://sendgrid.com/, tera o tempo de teste gratuito de 30 dias e a conta tera uma key para ser usada no modulo sendGrid no nodejs.
+SENDGRID_KEY= inserir a key de API do sendGrid para uso de servico de envio de email

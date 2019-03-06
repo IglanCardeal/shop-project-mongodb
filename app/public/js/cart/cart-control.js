@@ -1,16 +1,15 @@
-// sobre os dados:
-// - const idsArray - para adicionar os eventos para more, less e delete.
-// - totalPrice e productsData sao para os dados a serem renderizados dentro da ul.
-// rota para o ajax '/ajax-get-cart'.
-// o inputForm tera este formato:
-/*
-  <form>
-    <input type="submit" value="MORE" more="productId">
-  </form>
-*/
-
-// OBS: este arquivo utiliza o recurso async/await do JavaScript utilizado nos eventos dos inputs,
-// logo este arquivo neo e operacional em navegadores que nao suportam recursos modernos do JavaScript.
+/**
+ * sobre os dados: const idsArray - para adicionar os eventos para more, less e delete.
+ * totalPrice e productsData sao para os dados a serem renderizados dentro da ul.rota para o
+ * ajax '/ajax-get-cart'.
+ * o inputForm tera este formato:
+ * <form>
+ * <input type="submit" value="MORE" more="productId">
+ * </form>
+ * OBS: este arquivo utiliza o recurso async/await do JavaScript utilizado nos eventos dos
+ * inputs, logo este arquivo neo e operacional em navegadores que nao suportam recursos
+ * modernos do JavaScript.
+ */
 
 ("use strict");
 

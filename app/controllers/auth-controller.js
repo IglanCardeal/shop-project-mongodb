@@ -1,7 +1,18 @@
+/**
+ * @usercontrol
+ * @sendGrip modulo queusar key de conta para uso de servico de email da aplicacao.
+ * Key do sendGrid definida nas variaveis de ambiente.
+ * @bcrypt para criacao de hash de senha.
+ * @crypto para gerar keys para envio de email.
+ * Controller de autenticacao de usuario, criacao de usuario e redefinicao
+ * de senha de acesso da conta.
+ */
+
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const sendGrid = require("nodemailer-sendgrid-transport");
+const { validationResult } = require("express-validator/check");
 
 const User = require("../models/user");
 const { errorHandler } = require("./error-controller");
@@ -50,6 +61,7 @@ exports.getSignup = (req, res) => {
   res.render("auth/signup", {
     pageTitle: "Signup",
     path: "/signup",
+    username: "",
     error: req.flash("error")
   });
 };
@@ -58,18 +70,17 @@ exports.getSignup = (req, res) => {
 exports.postSignup = async (req, res) => {
   const { username, email, password, confirmPassword } = req.body;
   try {
-    if (await checkIncomingData(email, password, confirmPassword, req, res)) {
+    if (
+      await checkIncomingData(
+        username,
+        email,
+        password,
+        confirmPassword,
+        req,
+        res
+      )
+    ) {
       await saveNewUser(username, email, password);
-      // Envia email pelo metodo sendMail. Apesar de async, nao use await pois evita bloqueio quando muitos emails forem cadastrados simultaneamente.
-      transport.sendMail({
-        to: email,
-        from: process.env.APP_EMAIL,
-        subject: "Account Created",
-        html: `
-          <h1>Successfully signed up!</h1>
-          <p>Now you can access the online shop website. </p>
-        `
-      });
       req.flash("error", "Account created. Sign in!");
       res.redirect("/login");
     }
@@ -104,8 +115,8 @@ exports.postReset = async (req, res) => {
     user.tokenExpiration = Date.now() + 3600000;
     await user.save();
     transport.sendMail({
-      // to: email,
-      to: "cubeleexuzz@gmail.com", // seu email de teste
+      to: email,
+      // to: "your@gmail.com", // seu email de teste
       from: process.env.APP_EMAIL,
       subject: "Reseting your account password on Online Shop Project",
       html: `
@@ -122,9 +133,11 @@ exports.postReset = async (req, res) => {
         </div>
       `
     });
-    // mostrar uma pagina com a msg de email enviado para realizar reset password
-    // res.render('/info', { msg: 'Email sended!' })
-    res.redirect("/");
+    res.render("auth/mailed", {
+      pageTitle: "Email Sended",
+      path: "/mailed",
+      msg: "Email sended to your email account! Check it out."
+    });
   } catch (error) {
     console.log("Error: ", error);
     req.flash("error", "Unable to reset your password!");
@@ -140,13 +153,16 @@ exports.getResetToken = async (req, res) => {
       tokenExpiration: { $gt: Date.now() }
     });
     if (!user) {
-      req.flash("error", "Time to reset password expired! Try again.");
-      return res.redirect("/reset-password");
+      return inCaseOfNoUserFoundToResetPassword(
+        req,
+        res,
+        "Time to reset password expired! Try again."
+      );
     }
     res.render("auth/set-new-password", {
       pageTitle: "Set New Password",
       path: "/set-new-password",
-      error: "Set a new password down here:",
+      error: req.flash("error"),
       userId: user._id.toString(),
       token
     });
@@ -161,7 +177,7 @@ exports.postSetNewPassword = async (req, res) => {
   const { password, confirmPassword, userId, token } = req.body;
   if (!checkPasswords(password, confirmPassword)) {
     req.flash("error", "The passwords are not equal!");
-    return res.redirect("/reset-password");
+    return res.redirect(`/reset/${token}`);
   }
   try {
     const user = await User.findOne({
@@ -170,11 +186,11 @@ exports.postSetNewPassword = async (req, res) => {
       tokenExpiration: { $gt: Date.now() }
     });
     if (!user) {
-      req.flash(
-        "error",
+      return inCaseOfNoUserFoundToResetPassword(
+        req,
+        res,
         "Unable to reset password! Send your email again and try again later."
       );
-      return res.redirect("/reset-password");
     }
     user.password = await bcrypt.hash(password, 12);
     user.resetToken = user.tokenExpiration = undefined;
@@ -188,26 +204,35 @@ exports.postSetNewPassword = async (req, res) => {
   }
 };
 
+const inCaseOfNoUserFoundToResetPassword = (req, res, msg) => {
+  req.flash("error", msg);
+  return res.redirect("/reset-password");
+};
+
 const emailAlreadyExist = async email => {
   const user = await User.findOne({ email: email });
   return user ? true : false;
 };
 
-const checkPasswords = (pass1, pass2) => pass1 === pass2;
-
 const checkIncomingData = async (
+  username,
   email,
   password,
   confirmPassword,
   req,
   res
 ) => {
+  let errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/signup", {
+      pageTitle: "Signup",
+      path: "/signup",
+      username,
+      error: errors.array()[0].msg
+    });
+  }
   if (await emailAlreadyExist(email)) {
     req.flash("error", "The email is already in use! Try another one.");
-    return res.redirect("/signup");
-  }
-  if (!checkPasswords(password, confirmPassword)) {
-    req.flash("error", "The passwords are not equal! Try again.");
     return res.redirect("/signup");
   }
   return true;

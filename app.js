@@ -3,9 +3,10 @@ const checkNodeEnv = require("./check-node-env");
 checkNodeEnv();
 
 const PORT = process.env.PORT || 3000;
-const MONGODB_URL = `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${
-  process.env.DB_NAME
-}`;
+const MONGODB_URL = `
+  mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}
+`;
+
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -40,8 +41,12 @@ app.set("views", "./app/views");
 const preventCsrf = require("./middleware/prevent-csrf");
 const checkSession = require("./middleware/check-session");
 
+/**
+ * @helmet pode ajudar a proteger o aplicativo de algumas vulnerabilidades da web
+ * bastante conhecidas configurando os cabeçalhos HTTP adequadamente.
+ */
 app.use(helmet());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "app", "public")));
 app.use(
@@ -68,7 +73,7 @@ process.on("uncaughtException", error => {
   process.exit(1);
 });
 
-dataBaseConnection(async () => {
+dataBaseConnection(() => {
   console.log("Connection to MongoDB stablished with success!");
   app.listen(PORT, () => {
     console.log(`Server On - PORT ${PORT}`);
