@@ -1,6 +1,12 @@
+/**
+ * @onlineshopproject
+ * @author Iglan Cardeal
+ * @githubrespository https://github.com/IglanCardeal/shop-project-mongodb
+ * Projeto de shop online feito em NodeJS, Express e MongoDB.
+ */
+
 // Controla o ENV da aplicacao.
-const checkNodeEnv = require("./check-node-env");
-checkNodeEnv();
+const checkNodeEnv = require("./check-node-env")();
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URL = `
@@ -33,13 +39,15 @@ const errorController = require("./app/controllers/error-controller");
 // DataBase connection file.
 const dataBaseConnection = require(path.resolve("database", "connection"));
 
-// Setup das engines e views.
-app.set("view engine", "ejs");
-app.set("views", "./app/views");
-
 // Middlewares.
 const preventCsrf = require("./middleware/prevent-csrf");
 const checkSession = require("./middleware/check-session");
+const sessionSetup = require("./middleware/session-setup");
+const serverErrorHandler = require("./middleware/server-error-handler");
+
+// Setup das engines e views.
+app.set("view engine", "ejs");
+app.set("views", "./app/views");
 
 /**
  * @helmet pode ajudar a proteger o aplicativo de algumas vulnerabilidades da web
@@ -49,14 +57,7 @@ app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "app", "public")));
-app.use(
-  session({
-    secret: "my secret",
-    resave: false,
-    saveUninitialized: false,
-    store: sessionDataBase
-  })
-);
+app.use(session(sessionSetup(sessionDataBase)));
 app.use(csrf());
 app.use(flash());
 app.use(checkSession);
@@ -67,6 +68,7 @@ app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 app.use(errorController.get404);
+app.use(serverErrorHandler);
 
 process.on("uncaughtException", error => {
   console.log("Uncaught Error: ", error);

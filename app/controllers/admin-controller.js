@@ -5,17 +5,33 @@
  */
 
 const Product = require("../models/product");
-const { errorHandler } = require("./error-controller");
+const { validationResult } = require("express-validator/check");
 
-exports.getAddProduct = (req, res) => {
+/**
+ * catchServerErrorFunction recebe:
+ * objeto de error.
+ * httpStatusCode.
+ * msg de erro, verificacao se chamada e um ajax.
+ * next.
+ * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
+ */
+const { catchServerErrorFunction } = require("./error-controller");
+
+exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
-    editing: false
+    editing: false,
+    title: "",
+    price: 0.0,
+    imageUrl: "",
+    description: "",
+    productId: null,
+    error: ""
   });
 };
 
-exports.getProducts = async (req, res) => {
+exports.getProducts = async (req, res, next) => {
   const userId = req.user._id;
   try {
     const products = await Product.find({ userId: userId }).exec();
@@ -27,13 +43,33 @@ exports.getProducts = async (req, res) => {
     });
   } catch (error) {
     console.log("-----> Error: ", error);
-    return errorHandler(res, "Unable to get admin products!", req);
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to get admin products!",
+      false,
+      next
+    );
   }
 };
 
-exports.postAddProduct = async (req, res) => {
+exports.postAddProduct = async (req, res, next) => {
   const newBook = req.body;
   const userId = req.user._id;
+  let errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      editing: false,
+      title: newBook.title,
+      price: newBook.price,
+      description: newBook.description,
+      imageUrl: newBook.imageUrl,
+      productId: null,
+      error: errors.array()[0].msg
+    });
+  }
   const product = new Product({
     title: newBook.title,
     price: newBook.price,
@@ -46,11 +82,17 @@ exports.postAddProduct = async (req, res) => {
     return res.redirect("/admin/products");
   } catch (error) {
     console.log("-----> Error: ", error);
-    return errorHandler(res, "Unable to save the admin products!", req);
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to save the admin products!",
+      false,
+      next
+    );
   }
 };
 
-exports.getEditProduct = async (req, res) => {
+exports.getEditProduct = async (req, res, next) => {
   const { edit } = req.query;
   const { productId } = req.params;
   const userId = req.user._id;
@@ -66,18 +108,41 @@ exports.getEditProduct = async (req, res) => {
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
       editing: edit,
-      product: product
+      product: product,
+      error: null
     });
   } catch (error) {
     console.log("-----> Error: ", error);
-    return errorHandler(res, "Unable to get the product to edit", req);
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to get the product to edit",
+      false,
+      next
+    );
   }
 };
 
-exports.postEditProduct = async (req, res) => {
+exports.postEditProduct = async (req, res, next) => {
   const newBook = req.body;
   const userId = req.user._id;
   const { productId } = req.body;
+  let errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      product: {
+        title: newBook.title,
+        price: newBook.price,
+        description: newBook.description,
+        imageUrl: newBook.imageUrl,
+        _id: productId
+      },
+      error: errors.array()[0].msg,
+      editing: true
+    });
+  }
   try {
     const product = await Product.findOne({
       _id: productId,
@@ -95,11 +160,17 @@ exports.postEditProduct = async (req, res) => {
     return res.redirect("/admin/products");
   } catch (error) {
     console.log("-----> Error: ", error);
-    return errorHandler(res, "Unable to edit the product!", req);
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to edit the product!",
+      false,
+      next
+    );
   }
 };
 
-exports.postDeleteProduct = async (req, res) => {
+exports.postDeleteProduct = async (req, res, next) => {
   const { productId } = req.body;
   const userId = req.user._id;
   try {
@@ -110,11 +181,16 @@ exports.postDeleteProduct = async (req, res) => {
     return res.redirect("/admin/products");
   } catch (error) {
     console.log("-----> Error: ", error);
-    return errorHandler(res, "Unable to delete the product!", req);
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to delete the product!",
+      false,
+      next
+    );
   }
 };
 
-// Sobre o admin-user, adicionar funcionalidade de editar email, nome e redefinir senha.
 exports.getUser = (req, res) => {
   const { username, email, cart } = req.user;
   const qtyInCart = cart.items.length;

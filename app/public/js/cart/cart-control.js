@@ -25,8 +25,7 @@ const init = () => {
 
   const ajaxGetCart = () => {
     // faz a chamda para a API, recebe os dados e atribui as variaveis.
-    // toda vez que um input for acionado, esta funcao deve ser chamada ao final da funcao
-    // relacionada ao evento do input.
+    // toda vez que um input for acionado, esta funcao deve ser chamada ao final da funcao relacionada ao evento do input.
     const url = "/ajax-get-cart";
     ajax.open("POST", url);
     ajax.setRequestHeader("Content-Type", "application/json");

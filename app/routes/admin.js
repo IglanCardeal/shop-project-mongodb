@@ -1,37 +1,51 @@
+/**
+ * Rotas de administracao.
+ * Para as rotas de admin, ambas tem o prefixo '/admin' ajustado no app.use('/admin',
+ * adminRoutes) no arquivo App.js
+ */
+
 const express = require("express");
 const adminController = require("../controllers/admin-controller");
 const checkAuthentication = require("../../middleware/check-authentication");
 const router = express.Router();
 
-// Para as rotas de admin, ambas tem o prefixo '/admin' ajustado no app.use('/admin', adminRoutes)
-// no arquivo App.js
+const { body } = require("express-validator/check");
+const adminValidator = require("./validators/admin-validator");
 
 // GET
 router.get("/products", checkAuthentication, adminController.getProducts);
+
 router.get("/add-product", checkAuthentication, adminController.getAddProduct);
+
 router.get(
   "/edit-product/:productId",
   checkAuthentication,
   adminController.getEditProduct
 );
+
 router.get("/about-user", checkAuthentication, adminController.getUser);
 
 // POST
 router.post(
   "/add-product",
   checkAuthentication,
+  adminValidator.addAndEditProductValidator(body),
   adminController.postAddProduct
 );
+
 router.post(
   "/edit-product",
   checkAuthentication,
+  adminValidator.addAndEditProductValidator(body),
   adminController.postEditProduct
 );
+
 router.post(
   "/delete-product",
   checkAuthentication,
   adminController.postDeleteProduct
 );
+
 router.post("/postUserData", checkAuthentication, adminController.postUserData);
 
 module.exports = router;

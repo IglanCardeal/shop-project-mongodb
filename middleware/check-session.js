@@ -1,11 +1,13 @@
 const User = require("../app/models/user");
 
 module.exports = async (req, res, next) => {
-  if (!req.session.userId) {
-    return next();
+  if (!req.session.userId) return next();
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) return res.redirect("/login"); // quando id de sessao nao existir ou invalido.
+    req.user = user;
+    next();
+  } catch (error) {
+    next(new Error("Unable to search for session Id on User model"));
   }
-  const user = await User.findById(req.session.userId);
-  if (!user) return res.redirect("/login");
-  req.user = user;
-  next();
 };

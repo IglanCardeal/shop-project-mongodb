@@ -1,6 +1,6 @@
 /**
  * @usercontrol
- * @sendGrip modulo queusar key de conta para uso de servico de email da aplicacao.
+ * @sendGrip modulo que usar key de conta para uso de servico de email da aplicacao.
  * Key do sendGrid definida nas variaveis de ambiente.
  * @bcrypt para criacao de hash de senha.
  * @crypto para gerar keys para envio de email.
@@ -15,14 +15,23 @@ const sendGrid = require("nodemailer-sendgrid-transport");
 const { validationResult } = require("express-validator/check");
 
 const User = require("../models/user");
-const { errorHandler } = require("./error-controller");
+
+/**
+ * catchServerErrorFunction recebe:
+ * objeto de error.
+ * httpStatusCode.
+ * msg de erro, verificacao se chamada e um ajax.
+ * next.
+ * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
+ */
+const { catchServerErrorFunction } = require("./error-controller");
 
 // Informamos ao nodemailer, qual o servico que sera usado para enviar emails.
 // SendGrid sera usado como third service para o envio e tera as informacoes da key da conta.
 const transport = nodemailer.createTransport(
   sendGrid({
     auth: {
-      api_key: process.env.SENDGRID_KEY
+      api_key: process.env.SENDGRID_API_KEY
     }
   })
 );
@@ -31,29 +40,42 @@ exports.getLogin = (req, res) => {
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
-    error: req.flash("error")
+    email: "",
+    error: req.flash("error"),
+    field: ""
   });
 };
 
-// Manter os dados no formulario em caso de erros.
-exports.postLogin = async (req, res) => {
-  const { email, password } = req.body;
+exports.postLogin = async (req, res, next) => {
+  const { email, password, keep } = req.body;
   try {
-    if (await checkAllCredentials(email, password, req, res))
+    if (await checkAllCredentials(email, password, keep, req, res))
       return res.redirect("/");
   } catch (error) {
     console.log("Error: ", error);
-    return errorHandler(res, "Unable to login!");
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to login!",
+      false,
+      next
+    );
   }
 };
 
-exports.postLogout = async (req, res) => {
+exports.postLogout = async (req, res, next) => {
   try {
     await req.session.destroy();
     res.redirect("/login");
   } catch (error) {
     console.log("Error: ", error);
-    return errorHandler(res, "Unable to logout!", req);
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to logout!",
+      false,
+      next
+    );
   }
 };
 
@@ -62,53 +84,56 @@ exports.getSignup = (req, res) => {
     pageTitle: "Signup",
     path: "/signup",
     username: "",
-    error: req.flash("error")
+    email: "",
+    error: req.flash("error"),
+    field: ""
   });
 };
 
-// OBS: Adicionar verificacao e validacao de email e password.
-exports.postSignup = async (req, res) => {
-  const { username, email, password, confirmPassword } = req.body;
+exports.postSignup = async (req, res, next) => {
+  const { username, email, password } = req.body;
   try {
-    if (
-      await checkIncomingData(
-        username,
-        email,
-        password,
-        confirmPassword,
-        req,
-        res
-      )
-    ) {
+    if (await checkIncomingData(username, email, req, res)) {
       await saveNewUser(username, email, password);
-      req.flash("error", "Account created. Sign in!");
+      req.flash("error", "Account created. Log in!");
       res.redirect("/login");
     }
   } catch (error) {
     console.log("Error: ", error);
-    return errorHandler(res, "Unable to signup!");
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to signup!",
+      false,
+      next
+    );
   }
 };
 
 exports.getReset = (req, res) => {
-  let msg = "Inform your account email to reset the password.";
   res.render("auth/reset-password", {
     pageTitle: "Reset Password",
     path: "/reset",
-    msg,
+    msg: "Inform your account email to reset the password.",
+    field: "",
     error: req.flash("error")
   });
 };
 
-exports.postReset = async (req, res) => {
+exports.postReset = async (req, res, next) => {
   const { email } = req.body;
   try {
     const buffer = await crypto.randomBytes(32);
     const token = buffer.toString("hex");
     const user = await User.findOne({ email: email });
     if (!user) {
-      req.flash("error", "No account found! Try another email.");
-      return res.redirect("/reset-password");
+      return res.render("auth/reset-password", {
+        pageTitle: "Reset Password",
+        path: "/reset",
+        msg: "Inform your account email to reset the password.",
+        field: "email",
+        error: "No account found! Try another email."
+      });
     }
     user.resetToken = token;
     // 1 hora para expirar o token.
@@ -116,7 +141,7 @@ exports.postReset = async (req, res) => {
     await user.save();
     transport.sendMail({
       to: email,
-      // to: "your@gmail.com", // seu email de teste
+      // to: "your@gmail.com", // email de teste
       from: process.env.APP_EMAIL,
       subject: "Reseting your account password on Online Shop Project",
       html: `
@@ -140,12 +165,17 @@ exports.postReset = async (req, res) => {
     });
   } catch (error) {
     console.log("Error: ", error);
-    req.flash("error", "Unable to reset your password!");
-    return res.redirect("/login");
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to reset your password!",
+      false,
+      next
+    );
   }
 };
 
-exports.getResetToken = async (req, res) => {
+exports.getResetToken = async (req, res, next) => {
   const token = req.params.token;
   try {
     const user = await User.findOne({
@@ -168,12 +198,17 @@ exports.getResetToken = async (req, res) => {
     });
   } catch (error) {
     console.log("Error: ", error);
-    req.flash("error", "Unable to reset your password!");
-    return res.redirect("/reset");
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to reset your password!",
+      false,
+      next
+    );
   }
 };
 
-exports.postSetNewPassword = async (req, res) => {
+exports.postSetNewPassword = async (req, res, next) => {
   const { password, confirmPassword, userId, token } = req.body;
   if (!checkPasswords(password, confirmPassword)) {
     req.flash("error", "The passwords are not equal!");
@@ -199,8 +234,13 @@ exports.postSetNewPassword = async (req, res) => {
     res.redirect("/login");
   } catch (error) {
     console.log("Error: ", error);
-    req.flash("error", "Unable to reset your password!");
-    return res.redirect("/reset");
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to reset your password!",
+      false,
+      next
+    );
   }
 };
 
@@ -211,29 +251,30 @@ const inCaseOfNoUserFoundToResetPassword = (req, res, msg) => {
 
 const emailAlreadyExist = async email => {
   const user = await User.findOne({ email: email });
-  return user ? true : false;
+  return user.email ? true : false;
 };
 
-const checkIncomingData = async (
-  username,
-  email,
-  password,
-  confirmPassword,
-  req,
-  res
-) => {
+const checkIncomingData = async (username, email, req, res) => {
   let errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).render("auth/signup", {
       pageTitle: "Signup",
       path: "/signup",
       username,
-      error: errors.array()[0].msg
+      email,
+      error: errors.array()[0].msg,
+      field: errors.array()[0].param
     });
   }
   if (await emailAlreadyExist(email)) {
-    req.flash("error", "The email is already in use! Try another one.");
-    return res.redirect("/signup");
+    return res.status(422).render("auth/signup", {
+      pageTitle: "Signup",
+      path: "/signup",
+      username,
+      email,
+      error: "The email is already in use! Try another one.",
+      field: "email"
+    });
   }
   return true;
 };
@@ -248,23 +289,49 @@ const saveNewUser = async (username, email, password) => {
   await newUser.save();
 };
 
-const checkAllCredentials = async (email, password, req, res) => {
+const checkAllCredentials = async (email, password, keep, req, res) => {
+  let errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return inCaseOfInvalidData(
+      res,
+      email,
+      errors.array()[0].msg,
+      errors.array()[0].param
+    );
+  }
   const user = await User.findOne({
     email: email
   })
     .select("+password")
     .exec();
   if (!user) {
-    req.flash("error", "Invalid email or password!");
-    return res.redirect("/login");
+    return inCaseOfInvalidData(res, email, "User not found! Try again.", "");
   }
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
   if (!isPasswordCorrect) {
-    req.flash("error", "Invalid email or password!");
-    return res.redirect("/login");
+    return inCaseOfInvalidData(
+      res,
+      email,
+      "Invalid email or password! Try again.",
+      ""
+    );
+  }
+  if (keep === "yes") {
+    req.session.cookie.maxAge = 86400000 / 2; // 12 horas
+    req.session.resave = true;
   }
   req.session.isLoggedIn = true;
   req.session.userId = user._id;
   await req.session.save();
   return true;
+};
+
+const inCaseOfInvalidData = (res, email, errorMsg, field) => {
+  return res.status(422).render("auth/login", {
+    pageTitle: "Login",
+    path: "/login",
+    email,
+    error: errorMsg,
+    field
+  });
 };
