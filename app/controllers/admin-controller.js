@@ -56,25 +56,44 @@ exports.getProducts = async (req, res, next) => {
 exports.postAddProduct = async (req, res, next) => {
   const newBook = req.body;
   const userId = req.user._id;
-  let errors = validationResult(req);
-  if (!errors.isEmpty()) {
+  const image = req.file;
+  const postAddError = (res, title, price, description, errorMsg) => {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
       editing: false,
-      title: newBook.title,
-      price: newBook.price,
-      description: newBook.description,
-      imageUrl: newBook.imageUrl,
+      title: title,
+      price: price,
+      description: description,
       productId: null,
-      error: errors.array()[0].msg
+      error: errorMsg
     });
+  };
+  let errors = validationResult(req);
+  if (!image) {
+    return postAddError(
+      res,
+      newBook.title,
+      newBook.price,
+      newBook.description,
+      "No image file was attached! Please insert some image of the product."
+    );
+  }
+
+  if (!errors.isEmpty()) {
+    return postAddError(
+      res,
+      newBook.title,
+      newBook.price,
+      newBook.description,
+      errors.array()[0].msg
+    );
   }
   const product = new Product({
     title: newBook.title,
     price: newBook.price,
     description: newBook.description,
-    imageUrl: newBook.imageUrl,
+    imageUrl: image.path,
     userId: userId
   });
   try {
@@ -126,6 +145,7 @@ exports.getEditProduct = async (req, res, next) => {
 exports.postEditProduct = async (req, res, next) => {
   const newBook = req.body;
   const userId = req.user._id;
+  const image = req.file;
   const { productId } = req.body;
   let errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -136,7 +156,6 @@ exports.postEditProduct = async (req, res, next) => {
         title: newBook.title,
         price: newBook.price,
         description: newBook.description,
-        imageUrl: newBook.imageUrl,
         _id: productId
       },
       error: errors.array()[0].msg,
@@ -155,7 +174,9 @@ exports.postEditProduct = async (req, res, next) => {
     product.title = newBook.title;
     product.price = newBook.price;
     product.description = newBook.description;
-    product.imageUrl = newBook.imageUrl;
+    if (image) {
+      product.imageUrl = image.path;
+    }
     await product.save();
     return res.redirect("/admin/products");
   } catch (error) {

@@ -21,6 +21,7 @@ const session = require("express-session");
 const SessionStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const multer = require("multer");
 // const opn = require("opn");
 
 // Setup do app e armazenamento das sessoes.
@@ -49,15 +50,42 @@ const serverErrorHandler = require("./middleware/server-error-handler");
 app.set("view engine", "ejs");
 app.set("views", "./app/views");
 
+// Trata upload de arquivos.
+const fileStorage = multer.diskStorage({
+  destination: "app/public/users",
+  filename: (req, file, callback) => {
+    callback(null, new Date().toISOString() + "-" + file.originalname);
+  }
+});
+const fileFilter = (req, file, callback) => {
+  if (
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
+  ) {
+    callback(null, true);
+  } else {
+    callback(null, false);
+  }
+};
+// ------------------------
+
 /**
  * @helmet pode ajudar a proteger o aplicativo de algumas vulnerabilidades da web
  * bastante conhecidas configurando os cabeçalhos HTTP adequadamente.
  */
 app.use(helmet());
+app.use(session(sessionSetup(sessionDataBase)));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(
+  multer({
+    storage: fileStorage,
+    fileFilter: fileFilter
+  }).single("image")
+);
 app.use(express.static(path.join(__dirname, "app", "public")));
-app.use(session(sessionSetup(sessionDataBase)));
+app.use(express.static(path.join(__dirname)));
 app.use(csrf());
 app.use(flash());
 app.use(checkSession);
@@ -68,7 +96,7 @@ app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 app.use(errorController.get404);
-app.use(serverErrorHandler);
+// app.use(serverErrorHandler);
 
 process.on("uncaughtException", error => {
   console.log("Uncaught Error: ", error);

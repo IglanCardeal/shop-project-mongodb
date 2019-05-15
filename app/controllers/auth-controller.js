@@ -251,7 +251,10 @@ const inCaseOfNoUserFoundToResetPassword = (req, res, msg) => {
 
 const emailAlreadyExist = async email => {
   const user = await User.findOne({ email: email });
-  return user.email ? true : false;
+  if (user)
+    return true;
+  else 
+    return false;
 };
 
 const checkIncomingData = async (username, email, req, res) => {

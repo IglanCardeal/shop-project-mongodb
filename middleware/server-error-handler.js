@@ -7,7 +7,7 @@
  */
 
 module.exports = (error, req, res, next) => {
-  console.log(error);
+  console.log("Caught Server Error: \n" + error);
   const msg = error.errorMsg;
   if (error.isAjax) {
     return res.status(error.httpStatusCode).json({

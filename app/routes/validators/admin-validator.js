@@ -22,12 +22,12 @@ exports.addAndEditProductValidator = body => [
     .isString()
     .isLength({ min: 2, max: 256 })
     .trim(),
-  body("imageUrl", "Invalid URL address! Try again.")
-    .isURL({
-      // Apenas URL's externas para protocolos http e https.
-      protocol: ["http", "https"]
-    })
-    .trim(),
+  // body("imageUrl", "Invalid URL address! Try again.")
+  //   .isURL({
+  //     // Apenas URL's externas para protocolos http e https.
+  //     protocol: ["http", "https"]
+  //   })
+  //   .trim(),
   body(
     "description",
     "The description can not be greate than 1000 characters or less than 1 character."

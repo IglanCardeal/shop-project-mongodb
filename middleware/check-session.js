@@ -4,10 +4,12 @@ module.exports = async (req, res, next) => {
   if (!req.session.userId) return next();
   try {
     const user = await User.findById(req.session.userId);
-    if (!user) return res.redirect("/login"); // quando id de sessao nao existir ou invalido.
+    // if (!user) return res.redirect("/login"); // quando id de sessao nao existir ou invalido.
+    if (!user)
+      return next();
     req.user = user;
-    next();
+    return next();
   } catch (error) {
-    next(new Error("Unable to search for session Id on User model"));
+    return next(new Error("Unable to search for session Id on User model"));
   }
 };
