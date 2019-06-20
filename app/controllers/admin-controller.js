@@ -6,6 +6,7 @@
 
 const Product = require("../models/product");
 const { validationResult } = require("express-validator/check");
+const fs = require('fs')
 
 /**
  * catchServerErrorFunction recebe:
@@ -175,6 +176,7 @@ exports.postEditProduct = async (req, res, next) => {
     product.price = newBook.price;
     product.description = newBook.description;
     if (image) {
+      deleteFile(product.imageUrl);
       product.imageUrl = image.path;
     }
     await product.save();
@@ -195,6 +197,8 @@ exports.postDeleteProduct = async (req, res, next) => {
   const { productId } = req.body;
   const userId = req.user._id;
   try {
+    const product = await Product.findById(productId);
+    deleteFile(product.imageUrl);
     await Product.findOneAndDelete({
       _id: productId,
       userId: userId
@@ -231,4 +235,12 @@ exports.postUserData = async (req, res) => {
   const userData = { username: req.user.username };
   res.setHeader("Content-Type", "application/json");
   res.send(JSON.stringify(userData));
+};
+
+const deleteFile = async filePath => {
+  return new Promise((resolve, reject) => {
+    fs.unlink(filePath, err => {
+      if (err) reject(err);
+    });
+  })
 };

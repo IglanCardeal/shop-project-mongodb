@@ -109,7 +109,8 @@
 .product-img {
   box-shadow: 0 5px 5px black;
   height: 144px;
-  width: 110px;
+  min-width: 110px;
+  max-width: 150px;
 }
 
 .price_value {

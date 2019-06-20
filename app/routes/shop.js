@@ -33,4 +33,10 @@ router.post("/create-order", checkAuthentication, shopController.postOrder);
 
 router.post("/ajax-get-cart", checkAuthentication, shopController.ajaxGetCart);
 
+router.get(
+  "/order/:orderId",
+  checkAuthentication,
+  shopController.getInvoice
+);
+
 module.exports = router;

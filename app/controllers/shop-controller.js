@@ -8,6 +8,11 @@
 const Product = require("../models/product");
 const Order = require("../models/order");
 
+const fs = require("fs");
+const path = require("path");
+
+const PDFDocumentation = require("pdfkit");
+
 /**
  * catchServerErrorFunction recebe:
  * objeto de error.
@@ -18,9 +23,14 @@ const Order = require("../models/order");
  */
 const { catchServerErrorFunction } = require("./error-controller");
 
+const ITEMS_PER_PAGE = 2;
+
 exports.getIndex = async (req, res, next) => {
   try {
+    const page = req.query.page;
     const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE)
       .select("-userId")
       .exec();
     return res.render("shop/index", {
@@ -216,6 +226,84 @@ exports.postOrder = async (req, res, next) => {
   }
 };
 
+exports.getInvoice = async (req, res, next) => {
+  const orderId = req.params.orderId;
+  const userId = req.user._id;
+  const invoiceFileName = "invoice-" + orderId + ".pdf";
+  const invoicePath = path.join("app", "public", "invoices", invoiceFileName);
+  try {
+    const order = await Order.findById(orderId).exec();
+    if (!order) {
+      return catchServerErrorFunction(
+        error,
+        404,
+        "No order related to user found!",
+        false,
+        next
+      );
+    }
+    const orderBelongsToUser = Boolean(
+      order.user.userId.toString() === userId.toString()
+    );
+    if (!orderBelongsToUser) {
+      return catchServerErrorFunction(
+        error,
+        401,
+        "Unauthorized request denied!",
+        false,
+        next
+      );
+    }
+    // gerando arquivos pdf.
+    const pdfDoc = new PDFDocumentation();
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(res);
+    res.setHeader("Content-Type", "application/pdf"); // permite o browser identificar o tipo de arquivo.
+    res.setHeader(
+      // deifni como sera exibido pelo browser. Realiza download do arquivo.
+      "Content-Disposition",
+      'attachement; filename="' + invoiceFileName + '"'
+    );
+    pdfDoc.fontSize(28).text("INVOICE", { align: "center" });
+    pdfDoc.text(` ------- Orders from ${req.user.username} ------- `, {
+      align: "center"
+    });
+    let totalprice = 0;
+    order.products.forEach(prod => {
+      totalprice += prod.quantity * prod.product.price;
+      pdfDoc.text(
+        `
+      ${prod.product.title} - ${prod.quantity} x $${prod.product.price}
+      `,
+        {
+          align: "left"
+        }
+      );
+    });
+    pdfDoc.text(`Total Price: $${totalprice}`, { align: "center" });
+    pdfDoc.end();
+    // const data = await readFileAsync(invoicePath); // envio de arquivos pequenos.
+    // const file = fs.createReadStream(invoicePath); // streaming de arquivos grandes.
+    // res.setHeader("Content-Type", "application/pdf"); // permite o browser identificar o tipo de arquivo.
+    // res.setHeader(
+    //   // deifni como sera exibido pelo browser. Realiza download do arquivo.
+    //   "Content-Disposition",
+    //   'attachement; filename="' + invoiceFileName + '"'
+    // );
+    // return res.send(data);
+    // file.pipe(res); // envia cada pacote de stream na resposta.
+  } catch (error) {
+    console.log("-----> Error: ", error);
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to generate the invoice file!",
+      false,
+      next
+    );
+  }
+};
+
 const getDataFromCart = products => {
   const productsData = [];
   const idsArray = [];
@@ -247,4 +335,13 @@ const getProductsToOrder = user => {
   });
 
   return { cartProducts, totalPrice };
+};
+
+const readFileAsync = async invoicePath => {
+  return await new Promise((resolve, reject) => {
+    fs.readFile(invoicePath, (err, data) => {
+      if (err) reject(err);
+      else resolve(data);
+    });
+  });
 };
