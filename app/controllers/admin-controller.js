@@ -6,7 +6,7 @@
 
 const Product = require("../models/product");
 const { validationResult } = require("express-validator/check");
-const fs = require('fs')
+const fs = require("fs");
 
 /**
  * catchServerErrorFunction recebe:
@@ -17,6 +17,9 @@ const fs = require('fs')
  * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
  */
 const { catchServerErrorFunction } = require("./error-controller");
+
+const paginationFunction = require("../utils/pagination-function");
+const ITEMS_PER_PAGE = 3;
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -33,14 +36,19 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = async (req, res, next) => {
+  const page = Math.floor(+req.query.page) || 1;
   const userId = req.user._id;
   try {
-    const products = await Product.find({ userId: userId }).exec();
+    const products = await Product.find({ userId: userId })
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE)
+      .exec();
     return res.render("admin/products", {
       prods: products,
       pageTitle: "Admin Products",
       path: "/admin/products",
-      error: req.flash("error")
+      error: req.flash("error"),
+      ...(await paginationFunction(page, Product, ITEMS_PER_PAGE))
     });
   } catch (error) {
     console.log("-----> Error: ", error);
@@ -242,5 +250,5 @@ const deleteFile = async filePath => {
     fs.unlink(filePath, err => {
       if (err) reject(err);
     });
-  })
+  });
 };

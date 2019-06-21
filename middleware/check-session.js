@@ -10,6 +10,6 @@ module.exports = async (req, res, next) => {
     req.user = user;
     return next();
   } catch (error) {
-    return next(new Error("Unable to search for session Id on User model"));
+    return next(new Error("Unable to search for session Id to an user"));
   }
 };

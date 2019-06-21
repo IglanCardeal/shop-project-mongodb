@@ -23,21 +23,23 @@ const PDFDocumentation = require("pdfkit");
  */
 const { catchServerErrorFunction } = require("./error-controller");
 
-const ITEMS_PER_PAGE = 2;
+const paginationFunction = require("../utils/pagination-function");
+const ITEMS_PER_PAGE = 3;
 
 exports.getIndex = async (req, res, next) => {
   try {
-    const page = req.query.page;
+    let page = Math.floor(+req.query.page) || 1; // evita que numeros float ou string sejam atribuidas ao page.
     const products = await Product.find()
-      .skip((page - 1) * ITEMS_PER_PAGE)
-      .limit(ITEMS_PER_PAGE)
-      .select("-userId")
+      .skip((page - 1) * ITEMS_PER_PAGE) // quantidade de n primeiros items a ignorar na consulta.
+      .limit(ITEMS_PER_PAGE) // limite de retorno da query.
+      .select("-userId") // ignora o id do usuario.
       .exec();
     return res.render("shop/index", {
       prods: products,
       pageTitle: "Shop",
       path: "/",
-      isAuthenticated: req.session.isLoggedIn
+      isAuthenticated: req.session.isLoggedIn,
+      ...(await paginationFunction(page, Product, ITEMS_PER_PAGE))
     });
   } catch (error) {
     console.log("-----> Error: ", error);
@@ -53,14 +55,18 @@ exports.getIndex = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
+    let page = Math.floor(+req.query.page) || 1;
     const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE)
       .select("-userId")
       .exec();
     return res.render("shop/product-list", {
       prods: products,
       pageTitle: "All Products",
       path: "/products",
-      isAuthenticated: req.session.isLoggedIn
+      isAuthenticated: req.session.isLoggedIn,
+      ...(await paginationFunction(page, Product, ITEMS_PER_PAGE))
     });
   } catch (error) {
     console.log("-----> Error: ", error);

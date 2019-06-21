@@ -2,11 +2,11 @@
 
 * {
   box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 body {
-  padding: 0;
-  margin: 0;
   font-family: "Open Sans", sans-serif;
 }
 
@@ -241,13 +241,15 @@ form {
 .pagination a {
   text-decoration: none;
   color: #00695c;
-  padding: .5rem;
+  padding: 0.5rem;
   border: 1px solid #00695c;
   border-radius: 5px;
   margin: 0 1rem;
 }
 
-.pagination a:hover, .pagination a:active {
+.pagination a:hover,
+.pagination a:active,
+.pagination a.active {
   background: #00695c;
   color: white;
 }

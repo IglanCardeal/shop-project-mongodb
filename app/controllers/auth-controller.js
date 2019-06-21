@@ -228,7 +228,7 @@ exports.postSetNewPassword = async (req, res, next) => {
       );
     }
     user.password = await bcrypt.hash(password, 12);
-    user.resetToken = user.tokenExpiration = undefined;
+    user.resetToken = user.tokenExpiration = undefined; // reset de token e tempo de expiracao.
     await user.save();
     req.flash("error", "Your password has been reset! Try to login now.");
     res.redirect("/login");
