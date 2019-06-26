@@ -40,12 +40,19 @@ router.post(
   adminController.postEditProduct
 );
 
-router.post(
-  "/delete-product",
-  checkAuthentication,
-  adminController.postDeleteProduct
-);
+// router.post(
+//   "/delete-product",
+//   checkAuthentication,
+//   adminController.postDeleteProduct
+// );
 
 router.post("/postUserData", checkAuthentication, adminController.postUserData);
+
+// DELETE
+router.delete(
+  "/product/:productId",
+  checkAuthentication,
+  adminController.deleteProduct
+);
 
 module.exports = router;

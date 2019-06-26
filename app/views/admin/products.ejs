@@ -46,11 +46,9 @@
                           </div>
                           <div class="card__actions">
                             <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
-                            <form action="/admin/delete-product" method="POST">
-                                <input type="hidden" value="<%= product._id %>" name="productId">
-                                <button class="btn" type="submit">Delete</button>
-                                <%- include('../includes/csrf-token.ejs') %>
-                            </form>
+                              <input type="hidden" value="<%= product._id %>" name="productId">
+                              <button class="btn" type="button" onclick="deleteProduct(this)">Delete</button>
+                              <%- include('../includes/csrf-token.ejs') %>
                           </div>
                         </article>
                       <% } %>
@@ -65,5 +63,5 @@
                   <h1 class="empty">You are not logged!</h1>
                 <% } %>
             </main>
-
+            <script src="/js/admin/admin-products.js"></script>
       <%- include('../includes/end.ejs') %>

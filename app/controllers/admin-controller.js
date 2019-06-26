@@ -201,8 +201,32 @@ exports.postEditProduct = async (req, res, next) => {
   }
 };
 
-exports.postDeleteProduct = async (req, res, next) => {
-  const { productId } = req.body;
+// exports.postDeleteProduct = async (req, res, next) => {
+//   const { productId } = req.body;
+//   const userId = req.user._id;
+//   try {
+//     const product = await Product.findById(productId);
+//     deleteFile(product.imageUrl);
+//     await Product.findOneAndDelete({
+//       _id: productId,
+//       userId: userId
+//     }).exec();
+//     return res.redirect("/admin/products");
+//   } catch (error) {
+//     console.log("-----> Error: ", error);
+//     return catchServerErrorFunction(
+//       error,
+//       500,
+//       "Unable to delete the product!",
+//       false,
+//       next
+//     );
+//   }
+// };
+
+// Para operacao assincrona de deletar um produto.
+exports.deleteProduct = async (req, res, next) => {
+  const productId = req.params.productId;
   const userId = req.user._id;
   try {
     const product = await Product.findById(productId);
@@ -211,16 +235,10 @@ exports.postDeleteProduct = async (req, res, next) => {
       _id: productId,
       userId: userId
     }).exec();
-    return res.redirect("/admin/products");
+    return res.status(200).json({ msg: "Success!" });
   } catch (error) {
     console.log("-----> Error: ", error);
-    return catchServerErrorFunction(
-      error,
-      500,
-      "Unable to delete the product!",
-      false,
-      next
-    );
+    return res.status(500).json({ msg: "Delete product fail!" });
   }
 };
 
@@ -230,7 +248,7 @@ exports.getUser = (req, res) => {
   let productsInCart = "";
   if (qtyInCart === 0) productsInCart = `No products in cart.`;
   productsInCart = `${qtyInCart} products on cart.`;
-  res.render("admin/about-user", {
+  return res.render("admin/about-user", {
     pageTitle: "Your Data",
     path: "/user",
     editing: false,
