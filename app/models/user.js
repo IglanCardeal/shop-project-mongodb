@@ -54,7 +54,7 @@ const userSchema = new Schema({
 
 // Adiciona Product ao Cart e controla a quantidade de products no cart.
 userSchema.methods.addProductToCart = async function(productId, action = null) {
-  // this refere ao schema user pois se usa function
+  // this refere ao schema user pois se usa funcoes normais.
   const updateCartItems = [...this.cart.items];
   const cartProductIndex = this.cart.items.findIndex(cp => {
     if (cp.productId === undefined) return -1;
@@ -65,9 +65,7 @@ userSchema.methods.addProductToCart = async function(productId, action = null) {
   );
   const doDecrease = Boolean(cartProductIndex >= 0 && action === "decrease");
 
-  // caso ja exista, apenas incrementa
   if (doIncrease) updateCartItems[cartProductIndex].quantity++;
-  // caso ja exista, decrementa
   if (doDecrease) {
     updateCartItems[cartProductIndex].quantity--;
     if (updateCartItems[cartProductIndex].quantity === 0)
