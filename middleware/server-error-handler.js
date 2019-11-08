@@ -8,18 +8,18 @@
 
 module.exports = (error, req, res, next) => {
   console.log("Caught Server Error: \n" + error);
-  const msg = error.errorMsg;
+  const message = error.errorMsg;
   if (error.isAjax) {
     return res.status(error.httpStatusCode).json({
       title: "Server Error",
-      msg: msg,
+      msg: message,
       status: "500 - internal server error!"
     });
   }
   return res.status(error.httpStatusCode).render("404", {
     pageTitle: "Server Error",
     path: "",
-    msg,
+    msg: message,
     status: "500 - internal server error!",
     isAuthenticated: req.session.isLoggedIn
   });

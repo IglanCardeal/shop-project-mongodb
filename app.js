@@ -5,8 +5,8 @@
  * Projeto de shop online feito em NodeJS, Express e MongoDB.
  */
 
-// Controla o ENV da aplicacao.
-const checkNodeEnv = require("./check-node-env")();
+const dotenv = require("dotenv");
+dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URL = `
@@ -23,7 +23,7 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 const fileUploadHandler = require("./middleware/file-upload-handler");
-// const opn = require("opn");
+const open = require("open");
 
 // Setup do app e armazenamento das sessoes.
 const app = express();
@@ -86,7 +86,11 @@ process.on("uncaughtException", error => {
 
 dataBaseConnection(() => {
   console.log("Connection to MongoDB stablished with success!");
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
+    if (process.env.NODE_ENV === "PRODUCTION") {
+      await open(`http://localhost:${PORT}`, { app: "firefox" });
+    }
     console.log(`Server On - PORT ${PORT}`);
+    console.log(`Enviroment: ${process.env.NODE_ENV}`);
   });
 });
