@@ -1,6 +1,5 @@
-# shop-project-mongodb
+# Online Shop Project
 <p>
-  # Online Shop Project
   <hr>
   Site shop online feito com as tecnologias ** NodeJS** e **MongoDB**.
   
