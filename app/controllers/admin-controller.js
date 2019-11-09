@@ -43,12 +43,17 @@ exports.getProducts = async (req, res, next) => {
       .skip((page - 1) * ITEMS_PER_PAGE)
       .limit(ITEMS_PER_PAGE)
       .exec();
+    const paginationObject = await paginationFunction(
+      page,
+      Product,
+      ITEMS_PER_PAGE
+    );
     return res.render("admin/products", {
       prods: products,
       pageTitle: "Admin Products",
       path: "/admin/products",
       error: req.flash("error"),
-      ...(await paginationFunction(page, Product, ITEMS_PER_PAGE))
+      ...paginationObject
     });
   } catch (error) {
     console.log("-----> Error: ", error);

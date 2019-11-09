@@ -1,8 +1,8 @@
 # shop-project-mongodb
 <p>
 <<<<<<< HEAD
-  Construindo site com NodeJS e MongoDB.
-  Branch de desenvolvimento.
+# Online Shop Project
+  Site shop online feito com as tecnologias ** NodeJS** e **MongoDB**.
 =======
   Construindo site com NodeJS e MongoDB.</br>
   Desenvolvendo na branch 'dev'.

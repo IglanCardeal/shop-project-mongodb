@@ -24,7 +24,7 @@ const PDFDocumentation = require("pdfkit");
 const { catchServerErrorFunction } = require("./error-controller");
 
 const paginationFunction = require("../utils/pagination-function");
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 1;
 
 exports.getIndex = async (req, res, next) => {
   try {
@@ -34,12 +34,17 @@ exports.getIndex = async (req, res, next) => {
       .limit(ITEMS_PER_PAGE) // limite de retorno da query.
       .select("-userId") // ignora o id do usuario.
       .exec();
+    const paginationObject = await paginationFunction(
+      page,
+      Product,
+      ITEMS_PER_PAGE
+    );
     return res.render("shop/index", {
       prods: products,
       pageTitle: "Shop",
       path: "/",
       isAuthenticated: req.session.isLoggedIn,
-      ...(await paginationFunction(page, Product, ITEMS_PER_PAGE))
+      ...paginationObject
     });
   } catch (error) {
     console.log("-----> Error: ", error);
@@ -61,12 +66,17 @@ exports.getProducts = async (req, res, next) => {
       .limit(ITEMS_PER_PAGE)
       .select("-userId")
       .exec();
+    const paginationObject = await paginationFunction(
+      page,
+      Product,
+      ITEMS_PER_PAGE
+    );
     return res.render("shop/product-list", {
       prods: products,
       pageTitle: "All Products",
       path: "/products",
       isAuthenticated: req.session.isLoggedIn,
-      ...(await paginationFunction(page, Product, ITEMS_PER_PAGE))
+      ...paginationObject
     });
   } catch (error) {
     console.log("-----> Error: ", error);
