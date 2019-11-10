@@ -10,7 +10,8 @@ module.exports = async callback => {
     await mongoose.connect(
       url,
       {
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        useUnifiedTopology: true
       }
     );
     return callback();
