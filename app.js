@@ -80,17 +80,21 @@ app.use(errorController.get404);
 app.use(serverErrorHandler);
 
 process.on("uncaughtException", error => {
-  console.log("Uncaught Error: ", error);
+  console.log("Uncaught Error while starting: ", error);
   process.exit(1);
 });
 
-dataBaseConnection(() => {
-  console.log("Connection to MongoDB stablished with success!");
-  app.listen(PORT, async () => {
-    if (process.env.NODE_ENV === "PRODUCTION") {
-      await open(`http://localhost:${PORT}`, { app: "firefox" });
-    }
-    console.log(`Server On - PORT ${PORT}`);
-    console.log(`Enviroment: ${process.env.NODE_ENV}`);
+try {
+  dataBaseConnection(() => {
+    console.log("Connection to MongoDB stablished with success!");
+    app.listen(PORT, async () => {
+      if (process.env.NODE_ENV === "PRODUCTION") {
+        await open(`http://localhost:${PORT}`, { app: "firefox" });
+      }
+      console.log(`Server On - PORT ${PORT}`);
+      console.log(`Enviroment: ${process.env.NODE_ENV}`);
+    });
   });
-});
+} catch (error) {
+  console.log("Error while starting the server: ", error);
+}

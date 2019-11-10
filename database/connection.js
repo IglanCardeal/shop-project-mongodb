@@ -7,15 +7,12 @@ const DBNAME = process.env.DB_NAME;
 module.exports = async callback => {
   const url = `mongodb://${HOST}:${PORT}/${DBNAME}`;
   try {
-    await mongoose.connect(
-      url,
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    );
+    await mongoose.connect(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
     return callback();
   } catch (error) {
-    console.log("Error to connect database! ", error);
+    throw new Error("Error to connect database! Check mongodb url and/or port.");
   }
 };

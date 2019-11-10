@@ -28,8 +28,8 @@
             <label for="password">Password:</label>
             <input type="password" name="password" id="password">
           </div>
-            <input type="checkbox" id="keepConnect" /> Keep Me Connected<br />
-            <input type="hidden" id="keep" name="keep" value="no" />
+            <input type="checkbox" id="keepConnect" name="keep" value="yes" /> Keep Me Connected<br />
+            <!-- <input type="hidden" id="keep" name="keep" value="no" /> -->
           <button class="btn" id="submit" type="submit">Login</button>
           <%-
           include('../includes/csrf-token.ejs') %>

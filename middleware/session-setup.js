@@ -14,7 +14,8 @@ module.exports = dataBase => ({
     path: "/",
     secure: false, // 'true' para conexao HTTPS.
     maxAge: null, // encerra sessao ao fechar o browser.
-    httpOnly: true // Cookie nao pode ser lido por JS client side.
+    httpOnly: true, // Cookie nao pode ser lido por JS client side.
+    sameSite: true // envio restrito somente a origem.
   },
   store: dataBase // objeto de conexao com o banco.
 });

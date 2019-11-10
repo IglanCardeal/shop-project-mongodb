@@ -49,8 +49,40 @@ exports.getLogin = (req, res) => {
 exports.postLogin = async (req, res, next) => {
   const { email, password, keep } = req.body;
   try {
-    if (await checkAllCredentials(email, password, keep, req, res))
-      return res.redirect("/");
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return inCaseOfInvalidData(
+        res,
+        email,
+        errors.array()[0].msg,
+        errors.array()[0].param
+      );
+    }
+    const user = await User.findOne({
+      email: email
+    })
+      .select("+password")
+      .exec();
+    if (!user) {
+      return inCaseOfInvalidData(res, email, "User not found! Try again.", "");
+    }
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return inCaseOfInvalidData(
+        res,
+        email,
+        "Invalid email or password! Try again.",
+        ""
+      );
+    }
+    if (keep === "yes") {
+      const twelveHours = 86400000 / 2;
+      req.session.cookie.maxAge = twelveHours;
+    }
+    req.session.isLoggedIn = true;
+    req.session.userId = user._id;
+    await req.session.save();
+    return res.redirect("/");
   } catch (error) {
     console.log("Error: ", error);
     return catchServerErrorFunction(
@@ -93,11 +125,37 @@ exports.getSignup = (req, res) => {
 exports.postSignup = async (req, res, next) => {
   const { username, email, password } = req.body;
   try {
-    if (await checkIncomingData(username, email, req, res)) {
-      await saveNewUser(username, email, password);
-      req.flash("error", "Account created. Log in!");
-      res.redirect("/login");
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).render("auth/signup", {
+        pageTitle: "Signup",
+        path: "/signup",
+        username,
+        email,
+        error: errors.array()[0].msg,
+        field: errors.array()[0].param
+      });
     }
+    const emailAlreadyExist = await User.findOne({ email: email });
+    if (emailAlreadyExist) {
+      return res.status(422).render("auth/signup", {
+        pageTitle: "Signup",
+        path: "/signup",
+        username,
+        email,
+        error: "The email is already in use! Try another one.",
+        field: "email"
+      });
+    }
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword
+    });
+    await newUser.save();
+    req.flash("error", "Account created. Log in!");
+    res.redirect("/login");
   } catch (error) {
     console.log("Error: ", error);
     return catchServerErrorFunction(
@@ -247,86 +305,6 @@ exports.postSetNewPassword = async (req, res, next) => {
 const inCaseOfNoUserFoundToResetPassword = (req, res, msg) => {
   req.flash("error", msg);
   return res.redirect("/reset-password");
-};
-
-const emailAlreadyExist = async email => {
-  const user = await User.findOne({ email: email });
-  if (user)
-    return true;
-  else 
-    return false;
-};
-
-const checkIncomingData = async (username, email, req, res) => {
-  let errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).render("auth/signup", {
-      pageTitle: "Signup",
-      path: "/signup",
-      username,
-      email,
-      error: errors.array()[0].msg,
-      field: errors.array()[0].param
-    });
-  }
-  if (await emailAlreadyExist(email)) {
-    return res.status(422).render("auth/signup", {
-      pageTitle: "Signup",
-      path: "/signup",
-      username,
-      email,
-      error: "The email is already in use! Try another one.",
-      field: "email"
-    });
-  }
-  return true;
-};
-
-const saveNewUser = async (username, email, password) => {
-  const hashedPassword = await bcrypt.hash(password, 12);
-  const newUser = new User({
-    username,
-    email,
-    password: hashedPassword
-  });
-  await newUser.save();
-};
-
-const checkAllCredentials = async (email, password, keep, req, res) => {
-  let errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return inCaseOfInvalidData(
-      res,
-      email,
-      errors.array()[0].msg,
-      errors.array()[0].param
-    );
-  }
-  const user = await User.findOne({
-    email: email
-  })
-    .select("+password")
-    .exec();
-  if (!user) {
-    return inCaseOfInvalidData(res, email, "User not found! Try again.", "");
-  }
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
-  if (!isPasswordCorrect) {
-    return inCaseOfInvalidData(
-      res,
-      email,
-      "Invalid email or password! Try again.",
-      ""
-    );
-  }
-  if (keep === "yes") {
-    req.session.cookie.maxAge = 86400000 / 2; // 12 horas
-    req.session.resave = true;
-  }
-  req.session.isLoggedIn = true;
-  req.session.userId = user._id;
-  await req.session.save();
-  return true;
 };
 
 const inCaseOfInvalidData = (res, email, errorMsg, field) => {

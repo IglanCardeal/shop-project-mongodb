@@ -5,8 +5,7 @@ module.exports = async (req, res, next) => {
   try {
     const user = await User.findById(req.session.userId);
     // if (!user) return res.redirect("/login"); // quando id de sessao nao existir ou invalido.
-    if (!user)
-      return next();
+    if (!user) return next();
     req.user = user;
     return next();
   } catch (error) {

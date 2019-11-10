@@ -24,7 +24,7 @@ const PDFDocumentation = require("pdfkit");
 const { catchServerErrorFunction } = require("./error-controller");
 
 const paginationFunction = require("../utils/pagination-function");
-const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 3;
 
 exports.getIndex = async (req, res, next) => {
   try {

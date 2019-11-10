@@ -13,7 +13,7 @@ exports.loginValidator = body => [
     .trim()
     .isLength({ min: 3, max: 25 }),
   body("keep").custom((value, { req }) => {
-    const valid = Boolean(value === "yes" || value === "no");
+    const valid = Boolean(value === "yes" || value === undefined);
     if (!valid) {
       throw new Error("Invalid value for keep connected!");
     }
