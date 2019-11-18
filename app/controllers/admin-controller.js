@@ -94,7 +94,6 @@ exports.postAddProduct = async (req, res, next) => {
       "No image file was attached! Please insert some image of the product."
     );
   }
-
   if (!errors.isEmpty()) {
     return postAddError(
       res,

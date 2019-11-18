@@ -13,6 +13,8 @@
 
 ("use strict");
 
+const AJAX_DELAY_CART = 2000; // tempo de espera apos o primeiro click para efetuar a chamada AJAX do cart.
+
 const init = () => {
   const $main = document.querySelector("#main");
   const token = document.querySelector('[data="token"]').value;
@@ -72,9 +74,14 @@ const init = () => {
 
   function setReloadEvent() {
     const $reload = document.querySelector('[data="reload"]');
-    $reload.addEventListener("click", event => {
-      ajaxGetCart();
-    });
+    const delay = (callback, time) => {
+      let timer = 0;
+      return () => {
+        clearTimeout(timer);
+        timer = setTimeout(callback, time);
+      };
+    };
+    $reload.addEventListener("click", delay(ajaxGetCart, AJAX_DELAY_CART));
   }
 
   function whenEmptyCart($newDiv, $oldDiv) {
@@ -86,6 +93,7 @@ const init = () => {
     $reloadBtn.textContent = "Reload Cart";
     $msg.textContent = "No Products in Cart Yet!";
     $msg.setAttribute("class", "empty");
+    $newDiv.setAttribute("id", "content");
     $newDiv.appendChild($msg);
     $newDiv.appendChild($reloadBtn);
     $main.replaceChild($newDiv, $oldDiv);
@@ -131,7 +139,6 @@ const init = () => {
       const $more = document.querySelector(`[more="${id}"]`);
       $more.addEventListener("click", async event => {
         event.preventDefault();
-        // alert(`Incrementou id: ${$more.attributes["more"].value}`);
         await setControlOverCart("increase", id);
       });
     });
@@ -140,7 +147,6 @@ const init = () => {
       const $less = document.querySelector(`[less="${id}"]`);
       $less.addEventListener("click", async event => {
         event.preventDefault();
-        // alert(`Decrementou o id: ${$less.attributes["less"].value}`);
         await setControlOverCart("decrease", id);
       });
     });
@@ -149,7 +155,6 @@ const init = () => {
       const $delete = document.querySelector(`[delete="${id}"]`);
       $delete.addEventListener("click", async event => {
         event.preventDefault();
-        // alert(`Deletou id: ${$delete.attributes["delete"].value}`);
         await setControlOverCart("delete", id);
       });
     });
@@ -158,11 +163,12 @@ const init = () => {
   function renderProductsData() {
     const $oldDiv = document.querySelector("#content");
     const $newDiv = document.createElement("div");
+    if (!checkIfCartHasProducts()) {
+      return whenEmptyCart($newDiv, $oldDiv);
+    }
     const $ul = document.createElement("ul");
     $ul.setAttribute("class", "cart__item-list");
     $newDiv.setAttribute("id", "content");
-
-    if (!checkIfCartHasProducts()) return whenEmptyCart($newDiv, $oldDiv);
 
     const $liTotalPrice = document.createElement("li");
     $liTotalPrice.setAttribute("class", "cart_item price_value");
@@ -171,7 +177,7 @@ const init = () => {
     // elementos para o orderForm.
     const $orderDiv = document.createElement("div");
     const $orderForm = document.createElement("form");
-    const $orderButton = document.createElement("button");
+    const $orderButton = document.createElement("link");
     const $token = document.createElement("input");
     $orderDiv.setAttribute("class", "centered order-div");
     $orderForm.setAttribute("action", "/create-order");
@@ -182,6 +188,7 @@ const init = () => {
     $orderButton.setAttribute("type", "submit");
     $orderButton.setAttribute("class", "btn order");
     $orderButton.setAttribute("data", "order");
+    $orderButton.setAttribute("href", "/checkout");
     $orderButton.textContent = "Order Now!";
     $orderForm.appendChild($orderButton);
     $orderForm.appendChild($token);
@@ -250,6 +257,4 @@ const init = () => {
   ajaxGetCart();
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  init();
-});
+document.addEventListener("DOMContentLoaded", init());

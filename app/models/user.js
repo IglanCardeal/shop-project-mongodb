@@ -65,7 +65,8 @@ userSchema.methods.addProductToCart = async function(productId, action = null) {
   );
   const doDecrease = Boolean(cartProductIndex >= 0 && action === "decrease");
 
-  if (doIncrease) updateCartItems[cartProductIndex].quantity++;
+  if (doIncrease) 
+    updateCartItems[cartProductIndex].quantity++;
   if (doDecrease) {
     updateCartItems[cartProductIndex].quantity--;
     if (updateCartItems[cartProductIndex].quantity === 0)

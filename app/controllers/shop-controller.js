@@ -216,6 +216,21 @@ exports.getOrders = async (req, res, next) => {
   }
 };
 
+exports.getCheckout = async (req, res, next) => {
+  const user = await req.user.populate("cart.items.productId").execPopulate();
+  const products = user.cart.items;
+  let total = 0;
+  products.forEach(prod => {
+    total += prod.quantity * prod.productId.price
+  })
+  res.render('shop/checkout', {
+    path: 'checkout',
+    pageTitle: 'Checkout',
+    products: products,
+    totalSum: total
+  })
+};
+
 exports.postOrder = async (req, res, next) => {
   try {
     const user = await req.user.populate("cart.items.productId").execPopulate();

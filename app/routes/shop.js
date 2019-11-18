@@ -31,6 +31,8 @@ router.post(
 
 router.post("/create-order", checkAuthentication, shopController.postOrder);
 
+router.get("/checkout", checkAuthentication, shopController.getCheckout);
+
 router.post("/ajax-get-cart", checkAuthentication, shopController.ajaxGetCart);
 
 router.get("/order/:orderId", checkAuthentication, shopController.getInvoice);
