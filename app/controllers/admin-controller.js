@@ -18,7 +18,7 @@ const { validationResult } = require("express-validator/check");
 const { catchServerErrorFunction } = require("./error-controller");
 
 const paginationFunction = require("../utils/pagination-function");
-const deleteFile = require("../utils/delete-file");
+const { deleteFile } = require("../utils/delete-file");
 
 const ITEMS_PER_PAGE = 3;
 
@@ -47,7 +47,8 @@ exports.getProducts = async (req, res, next) => {
     const paginationObject = await paginationFunction(
       page,
       Product,
-      ITEMS_PER_PAGE
+      ITEMS_PER_PAGE,
+      userId
     );
     return res.render("admin/products", {
       prods: products,

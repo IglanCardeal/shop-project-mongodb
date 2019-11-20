@@ -5,6 +5,9 @@
  * @catchServerErrorFunction funcao que executa tratamento de erros.
  */
 
+const dotenv = require("dotenv");
+dotenv.config();
+
 const Product = require("../models/product");
 const Order = require("../models/order");
 
@@ -12,6 +15,8 @@ const fs = require("fs");
 const path = require("path");
 
 const PDFDocumentation = require("pdfkit");
+const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY;
+const stripe = require("stripe")(STRIPE_PRIVATE_KEY);
 
 /**
  * catchServerErrorFunction recebe:
@@ -221,14 +226,28 @@ exports.getCheckout = async (req, res, next) => {
   const products = user.cart.items;
   let total = 0;
   products.forEach(prod => {
-    total += prod.quantity * prod.productId.price
-  })
-  res.render('shop/checkout', {
-    path: 'checkout',
-    pageTitle: 'Checkout',
-    products: products,
-    totalSum: total
-  })
+    total += prod.quantity * prod.productId.price;
+  });
+  stripe.checkout.sessions.create(
+    {
+      success_url: "https://example.com/success",
+      cancel_url: "https://example.com/cancel",
+      payment_method_types: ["card"],
+      line_items: products
+    },
+    function(error, session) {
+      if (error) {
+        console.log(error);
+      }
+      res.render("shop/checkout", {
+        path: "checkout",
+        pageTitle: "Checkout",
+        products: products,
+        totalSum: total,
+        sessionId: session.id
+      });
+    }
+  );
 };
 
 exports.postOrder = async (req, res, next) => {
@@ -261,7 +280,14 @@ exports.getInvoice = async (req, res, next) => {
   const orderId = req.params.orderId;
   const userId = req.user._id;
   const invoiceFileName = "invoice-" + orderId + ".pdf";
-  const invoicePath = path.join("app", "public", "invoices", invoiceFileName);
+  const currentYear = new Date().getFullYear().toString();
+  const invoicePath = path.join(
+    "app",
+    "public",
+    "invoices",
+    currentYear,
+    invoiceFileName
+  );
   try {
     const order = await Order.findById(orderId).exec();
     if (!order) {
