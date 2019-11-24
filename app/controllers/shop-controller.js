@@ -15,8 +15,8 @@ const fs = require("fs");
 const path = require("path");
 
 const PDFDocumentation = require("pdfkit");
-const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY;
-const stripe = require("stripe")(STRIPE_PRIVATE_KEY);
+// const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY;
+// const stripe = require("stripe")(STRIPE_PRIVATE_KEY);
 
 /**
  * catchServerErrorFunction recebe:
@@ -199,6 +199,122 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
+/** 
+ ========== Dois metodos usados para pagamento com a API @Stripe ========== 
+exports.getCheckout = async (req, res, next) => {
+  try {
+    const user = await req.user.populate("cart.items.productId").execPopulate();
+    const products = user.cart.items;
+    let total = 0;
+    products.forEach(prod => {
+      total += prod.quantity * prod.productId.price;
+    });
+    const line_items = products.map(p => {
+      return {
+        name: p.productId.title,
+        description: p.productId.description,
+        amount: p.productId.price * 100, // valor em centavos.
+        currency: "usd",
+        quantity: p.quantity
+      };
+    });
+    stripe.checkout.sessions.create(
+      {
+        success_url: "https://example.com/success",
+        cancel_url: "https://example.com/cancel",
+        payment_method_types: ["card"],
+        line_items: line_items,
+        success_url: `${req.protocol}://${req.get("host")}/checkout/success`,
+        cancel_url: `${req.protocol}://${req.get("host")}/checkout/cancel`
+      },
+      function(error, session) {
+        if (error) throw error;
+        return res.render("shop/checkout", {
+          path: "/checkout",
+          pageTitle: "Checkout",
+          products: products,
+          totalSum: total,
+          isAuthenticated: req.session.isLoggedIn,
+          sessionId: session.id
+        });
+      }
+    );
+  } catch (error) {
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to process your payment! Try again later.",
+      false,
+      next
+    );
+  }
+};
+
+exports.getCheckoutSuccess = async (req, res, next) => {
+  const getProductsToOrder = user => {
+    let totalPrice = 0;
+    let cartProducts = user.cart.items.map(item => {
+      totalPrice += item.productId._doc.price * item.quantity;
+      return {
+        // '._doc' extrai todos os dados do documento relacionado.
+        product: { ...item.productId._doc },
+        quantity: item.quantity
+      };
+    });
+    return { cartProducts, totalPrice };
+  };
+  try {
+    const user = await req.user.populate("cart.items.productId").execPopulate();
+    const order = new Order({
+      user: {
+        email: req.user.email,
+        userId: req.user._id
+      },
+      totalPrice: getProductsToOrder(user).totalPrice,
+      products: getProductsToOrder(user).cartProducts
+    });
+    await order.save();
+    await req.user.clearCart();
+    return res.redirect("/orders");
+  } catch (error) {
+    console.log("-----> Error: ", error);
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to add new orders!",
+      false,
+      next
+    );
+  }
+};
+ */
+
+exports.getCheckout = async (req, res, next) => {
+  try {
+    const user = await req.user.populate("cart.items.productId").execPopulate();
+    const products = user.cart.items;
+    let total = 0;
+    products.forEach(prod => {
+      total += prod.quantity * prod.productId.price;
+    });
+    return res.render("shop/checkout", {
+      path: "/checkout",
+      pageTitle: "Checkout",
+      products: products,
+      totalSum: total,
+      isAuthenticated: req.session.isLoggedIn
+    });
+  } catch (error) {
+    return catchServerErrorFunction(
+      error,
+      500,
+      "Unable to process your payment! Try again later.",
+      false,
+      next
+    );
+  }
+};
+
 exports.getOrders = async (req, res, next) => {
   try {
     const userOrders = await Order.find({
@@ -221,36 +337,19 @@ exports.getOrders = async (req, res, next) => {
   }
 };
 
-exports.getCheckout = async (req, res, next) => {
-  const user = await req.user.populate("cart.items.productId").execPopulate();
-  const products = user.cart.items;
-  let total = 0;
-  products.forEach(prod => {
-    total += prod.quantity * prod.productId.price;
-  });
-  stripe.checkout.sessions.create(
-    {
-      success_url: "https://example.com/success",
-      cancel_url: "https://example.com/cancel",
-      payment_method_types: ["card"],
-      line_items: products
-    },
-    function(error, session) {
-      if (error) {
-        console.log(error);
-      }
-      res.render("shop/checkout", {
-        path: "checkout",
-        pageTitle: "Checkout",
-        products: products,
-        totalSum: total,
-        sessionId: session.id
-      });
-    }
-  );
-};
-
 exports.postOrder = async (req, res, next) => {
+  const getProductsToOrder = user => {
+    let totalPrice = 0;
+    let cartProducts = user.cart.items.map(item => {
+      totalPrice += item.productId._doc.price * item.quantity;
+      return {
+        // '._doc' extrai todos os dados do documento relacionado.
+        product: { ...item.productId._doc },
+        quantity: item.quantity
+      };
+    });
+    return { cartProducts, totalPrice };
+  };
   try {
     const user = await req.user.populate("cart.items.productId").execPopulate();
     const order = new Order({
@@ -339,16 +438,6 @@ exports.getInvoice = async (req, res, next) => {
     });
     pdfDoc.text(`Total Price: $${totalprice}`, { align: "center" });
     pdfDoc.end();
-    // const data = await readFileAsync(invoicePath); // envio de arquivos pequenos.
-    // const file = fs.createReadStream(invoicePath); // streaming de arquivos grandes.
-    // res.setHeader("Content-Type", "application/pdf"); // permite o browser identificar o tipo de arquivo.
-    // res.setHeader(
-    //   // deifni como sera exibido pelo browser. Realiza download do arquivo.
-    //   "Content-Disposition",
-    //   'attachement; filename="' + invoiceFileName + '"'
-    // );
-    // return res.send(data);
-    // file.pipe(res); // envia cada pacote de stream na resposta.
   } catch (error) {
     console.log("-----> Error: ", error);
     return catchServerErrorFunction(
@@ -378,27 +467,4 @@ const getDataFromCart = products => {
     productsData: productsData,
     totalPrice: totalPrice
   };
-};
-
-const getProductsToOrder = user => {
-  let totalPrice = 0;
-  let cartProducts = user.cart.items.map(item => {
-    totalPrice += item.productId._doc.price * item.quantity;
-    return {
-      // '._doc' extrai todos os dados do documento relacionado.
-      product: { ...item.productId._doc },
-      quantity: item.quantity
-    };
-  });
-
-  return { cartProducts, totalPrice };
-};
-
-const readFileAsync = async invoicePath => {
-  return await new Promise((resolve, reject) => {
-    fs.readFile(invoicePath, (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
-    });
-  });
 };

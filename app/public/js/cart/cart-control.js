@@ -13,7 +13,8 @@
 
 ("use strict");
 
-const AJAX_DELAY_CART = 2000; // tempo de espera apos o primeiro click para efetuar a chamada AJAX do cart.
+const AJAX_DELAY_CART = 500; // tempo de espera apos o primeiro click para efetuar a chamada AJAX do cart.
+const CAR_LOAD_DELAY = 500;
 
 const init = () => {
   const $main = document.querySelector("#main");
@@ -25,9 +26,28 @@ const init = () => {
   let productsData = [];
   let totalPrice;
 
-  const ajaxGetCart = () => {
-    // faz a chamda para a API, recebe os dados e atribui as variaveis.
-    // toda vez que um input for acionado, esta funcao deve ser chamada ao final da funcao relacionada ao evento do input.
+  function animationWhileLoading() {
+    const loadingDiv = document.createElement("div");
+    const loadingTitle = document.createElement("h2");
+    const loadingImg = document.createElement("img");
+    loadingImg.setAttribute("src", "/img/loading.gif");
+    loadingImg.setAttribute("class", "loading-gif");
+    loadingTitle.innerHTML = "Loading products. Wait few seconds.";
+    loadingTitle.setAttribute("class", "loading-title");
+    loadingDiv.setAttribute("class", "loading");
+    loadingDiv.appendChild(loadingImg);
+    loadingDiv.appendChild(loadingTitle);
+    $main.appendChild(loadingDiv);
+  }
+
+  function clearLoadingAnimation() {
+    const $loadDiv = document.querySelector(".loading");
+    if ($loadDiv) {
+      $main.removeChild($loadDiv);
+    }
+  }
+
+  function sendAjaxRequest() {
     const url = "/ajax-get-cart";
     ajax.open("POST", url);
     ajax.setRequestHeader("Content-Type", "application/json");
@@ -48,13 +68,22 @@ const init = () => {
         idsArray = jsonData.idsArray;
         productsData = jsonData.productsData;
         totalPrice = jsonData.totalPrice;
+        clearLoadingAnimation();
         return renderProductsData();
       }
       if (requestFailed) {
         const errorData = JSON.parse(ajax.responseText);
+        clearLoadingAnimation();
         return inCaseOfError(errorData);
       }
     });
+  }
+
+  animationWhileLoading();
+  const ajaxGetCart = () => {
+    // faz a chamda para a API, recebe os dados e atribui as variaveis.
+    // toda vez que um input for acionado, esta funcao deve ser chamada ao final da funcao relacionada ao evento do input.
+    setTimeout(sendAjaxRequest, CAR_LOAD_DELAY);
   };
 
   function inCaseOfError(errorData) {
@@ -72,16 +101,19 @@ const init = () => {
     $main.appendChild($center);
   }
 
+  function delay(callback, time) {
+    let timer = 0;
+    return () => {
+      clearTimeout(timer);
+      timer = setTimeout(callback, time);
+    };
+  }
+
   function setReloadEvent() {
     const $reload = document.querySelector('[data="reload"]');
-    const delay = (callback, time) => {
-      let timer = 0;
-      return () => {
-        clearTimeout(timer);
-        timer = setTimeout(callback, time);
-      };
-    };
-    $reload.addEventListener("click", delay(ajaxGetCart, AJAX_DELAY_CART));
+    $reload.addEventListener("click", () => {
+      delay(ajaxGetCart, AJAX_DELAY_CART)
+    });
   }
 
   function whenEmptyCart($newDiv, $oldDiv) {
@@ -139,7 +171,7 @@ const init = () => {
       const $more = document.querySelector(`[more="${id}"]`);
       $more.addEventListener("click", async event => {
         event.preventDefault();
-        await setControlOverCart("increase", id);
+        setControlOverCart("increase", id);
       });
     });
     // --------------------------- less --------------------------------------
@@ -147,7 +179,7 @@ const init = () => {
       const $less = document.querySelector(`[less="${id}"]`);
       $less.addEventListener("click", async event => {
         event.preventDefault();
-        await setControlOverCart("decrease", id);
+        setControlOverCart("decrease", id);
       });
     });
     // --------------------------- delete --------------------------------------
@@ -155,7 +187,7 @@ const init = () => {
       const $delete = document.querySelector(`[delete="${id}"]`);
       $delete.addEventListener("click", async event => {
         event.preventDefault();
-        await setControlOverCart("delete", id);
+        setControlOverCart("delete", id);
       });
     });
   }
@@ -214,7 +246,7 @@ const init = () => {
 
       $title.textContent = `${product.data.title}`;
       $quantity.textContent = `Quantity: ${product.quantity}`;
-      $price.textContent = `Price: $${product.data.price}`;
+      $price.textContent = `Unit price: $${product.data.price}`;
 
       // cria os inputs para more, less e delete.
       $inputMore.setAttribute("class", "btn primary");

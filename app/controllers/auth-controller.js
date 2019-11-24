@@ -36,6 +36,11 @@ const transport = nodemailer.createTransport(
   })
 );
 
+const inCaseOfNoUserFoundToResetPassword = (req, res, msg) => {
+  req.flash("error", msg);
+  return res.redirect("/reset-password");
+};
+
 exports.getLogin = (req, res) => {
   res.render("auth/login", {
     pageTitle: "Login",
@@ -48,6 +53,15 @@ exports.getLogin = (req, res) => {
 
 exports.postLogin = async (req, res, next) => {
   const { email, password, keep } = req.body;
+  const inCaseOfInvalidData = (res, email, errorMsg, field) => {
+    return res.status(422).render("auth/login", {
+      pageTitle: "Login",
+      path: "/login",
+      email,
+      error: errorMsg,
+      field
+    });
+  };
   try {
     let errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -98,7 +112,7 @@ exports.postLogin = async (req, res, next) => {
 exports.postLogout = async (req, res, next) => {
   try {
     await req.session.destroy();
-    res.redirect("/login");
+    return res.redirect("/login");
   } catch (error) {
     console.log("Error: ", error);
     return catchServerErrorFunction(
@@ -112,7 +126,7 @@ exports.postLogout = async (req, res, next) => {
 };
 
 exports.getSignup = (req, res) => {
-  res.render("auth/signup", {
+  return res.render("auth/signup", {
     pageTitle: "Signup",
     path: "/signup",
     username: "",
@@ -155,7 +169,7 @@ exports.postSignup = async (req, res, next) => {
     });
     await newUser.save();
     req.flash("error", "Account created. Log in!");
-    res.redirect("/login");
+    return res.redirect("/login");
   } catch (error) {
     console.log("Error: ", error);
     return catchServerErrorFunction(
@@ -169,7 +183,7 @@ exports.postSignup = async (req, res, next) => {
 };
 
 exports.getReset = (req, res) => {
-  res.render("auth/reset-password", {
+  return res.render("auth/reset-password", {
     pageTitle: "Reset Password",
     path: "/reset",
     msg: "Inform your account email to reset the password.",
@@ -180,9 +194,17 @@ exports.getReset = (req, res) => {
 
 exports.postReset = async (req, res, next) => {
   const { email } = req.body;
+  const generateRandomToken = async () => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(32, (error, buffer) => {
+        if (error) {
+          throw error;
+        }
+        resolve(buffer.toString("hex"));
+      });
+    });
+  };
   try {
-    const buffer = await crypto.randomBytes(32);
-    const token = buffer.toString("hex");
     const user = await User.findOne({ email: email });
     if (!user) {
       return res.render("auth/reset-password", {
@@ -193,6 +215,7 @@ exports.postReset = async (req, res, next) => {
         error: "No account found! Try another email."
       });
     }
+    const token = await generateRandomToken();
     user.resetToken = token;
     // 1 hora para expirar o token.
     user.tokenExpiration = Date.now() + 3600000;
@@ -247,7 +270,7 @@ exports.getResetToken = async (req, res, next) => {
         "Time to reset password expired! Try again."
       );
     }
-    res.render("auth/set-new-password", {
+    return res.render("auth/set-new-password", {
       pageTitle: "Set New Password",
       path: "/set-new-password",
       error: req.flash("error"),
@@ -268,7 +291,7 @@ exports.getResetToken = async (req, res, next) => {
 
 exports.postSetNewPassword = async (req, res, next) => {
   const { password, confirmPassword, userId, token } = req.body;
-  if (!checkPasswords(password, confirmPassword)) {
+  if (!(password === confirmPassword)) {
     req.flash("error", "The passwords are not equal!");
     return res.redirect(`/reset/${token}`);
   }
@@ -289,7 +312,7 @@ exports.postSetNewPassword = async (req, res, next) => {
     user.resetToken = user.tokenExpiration = undefined; // reset de token e tempo de expiracao.
     await user.save();
     req.flash("error", "Your password has been reset! Try to login now.");
-    res.redirect("/login");
+    return res.redirect("/login");
   } catch (error) {
     console.log("Error: ", error);
     return catchServerErrorFunction(
@@ -300,19 +323,4 @@ exports.postSetNewPassword = async (req, res, next) => {
       next
     );
   }
-};
-
-const inCaseOfNoUserFoundToResetPassword = (req, res, msg) => {
-  req.flash("error", msg);
-  return res.redirect("/reset-password");
-};
-
-const inCaseOfInvalidData = (res, email, errorMsg, field) => {
-  return res.status(422).render("auth/login", {
-    pageTitle: "Login",
-    path: "/login",
-    email,
-    error: errorMsg,
-    field
-  });
 };

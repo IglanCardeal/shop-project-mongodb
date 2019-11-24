@@ -5,6 +5,12 @@
  * Projeto de shop online feito em NodeJS, Express e MongoDB.
  */
 
+/**
+ * @PRECISA_TERMINAR
+ * 1 - valiadacao front-end para os campos de login no arquivo `login.js`.
+ * 2 - separar e reorganizar o HTML da pagina para envio de e-mail de reset de password.
+ */
+
 const dotenv = require("dotenv");
 dotenv.config();
 
