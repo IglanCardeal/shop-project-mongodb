@@ -6,9 +6,13 @@
  * controllers.
  */
 
+const { join } = require("path");
+const generateLogErrors = require("../errors/errors-log-handler");
+
 module.exports = (error, req, res, next) => {
-  console.log("Caught Server Error: \n" + error);
   const message = error.errorMsg;
+  const filepath = join(__dirname, "../logs/errors.log");
+  generateLogErrors(error, filepath, error.statusCode);
   if (error.isAjax) {
     return res.status(error.httpStatusCode).json({
       title: "Server Error",

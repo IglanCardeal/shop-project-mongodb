@@ -82,18 +82,6 @@ app.use(routes);
 app.use(errorController.get404);
 app.use(serverErrorHandler);
 
-// Process para verificar erros nao tratados e salvar nos arquivos de log.
-// verificar possivel error de EMFILE devido abertura de arquivos para gravar logs de erros.
-process.on("uncaughtException", error => {
-  const filepath = path.join(__dirname, "/logs/uncaught-exception-errors.log");
-  unhandledException(error, filepath, "uncaughtException");
-});
-
-process.on("unhandledRejection", error => {
-  const filepath = path.join(__dirname, "/logs/unhandled-rejection-errors.log");
-  unhandledException(error, filepath, "unhandledRejection");
-});
-
 try {
   dataBaseConnection(() => {
     console.log("Connection to MongoDB stablished with success!");

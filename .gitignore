@@ -3,8 +3,4 @@ node_modules
 backup
 .vscode
 .env
-<<<<<<< HEAD
 wrap-up.js
-=======
-wrap-up.js
->>>>>>> d805cd631edb183380befbf03b2505786c38a512

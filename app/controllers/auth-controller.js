@@ -221,15 +221,13 @@ exports.postReset = async (req, res, next) => {
     // 1 hora para expirar o token.
     user.tokenExpiration = Date.now() + 3600000;
     await user.save();
-    transport.sendMail(
-      {
-        to: email,
-        // to: "your@gmail.com", // email de teste
-        from: process.env.APP_EMAIL,
-        subject: "Reseting your account password on Online Shop Project",
-        html: htmlBodyEmail(`${req.protocol}://${req.get("host")}`, token)
-      }
-    );
+    transport.sendMail({
+      to: email,
+      // to: "your@gmail.com", // email de teste
+      from: process.env.APP_EMAIL,
+      subject: "Reseting your account password on Online Shop Project",
+      html: htmlBodyEmail(`${req.protocol}://${req.get("host")}`, token)
+    });
     res.render("auth/mailed", {
       pageTitle: "Email Sended",
       path: "/mailed",
