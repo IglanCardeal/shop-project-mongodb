@@ -25,6 +25,7 @@ const User = require("../models/user");
  * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
  */
 const { catchServerErrorFunction } = require("./error-controller");
+const htmlBodyEmail = require("../utils/body-email");
 
 // Informamos ao nodemailer, qual o servico que sera usado para enviar emails.
 // SendGrid sera usado como third service para o envio e tera as informacoes da key da conta.
@@ -220,25 +221,15 @@ exports.postReset = async (req, res, next) => {
     // 1 hora para expirar o token.
     user.tokenExpiration = Date.now() + 3600000;
     await user.save();
-    transport.sendMail({
-      to: email,
-      // to: "your@gmail.com", // email de teste
-      from: process.env.APP_EMAIL,
-      subject: "Reseting your account password on Online Shop Project",
-      html: `
-        <div style="text-align: center;">
-          <h1>You requested a password reset!</h1>
-          <h3 style="color: red">
-            Ignore this message and do not click on link if you did not request a password reset on our website.
-          </h3>
-          <p>
-            Click this <a href="${process.env.APP_URL +
-              process.env
-                .PORT}/reset/${token}">link</a> to set your new password!
-          </p>
-        </div>
-      `
-    });
+    transport.sendMail(
+      {
+        to: email,
+        // to: "your@gmail.com", // email de teste
+        from: process.env.APP_EMAIL,
+        subject: "Reseting your account password on Online Shop Project",
+        html: htmlBodyEmail(`${req.protocol}://${req.get("host")}`, token)
+      }
+    );
     res.render("auth/mailed", {
       pageTitle: "Email Sended",
       path: "/mailed",

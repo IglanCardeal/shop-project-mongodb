@@ -1,9 +1,3 @@
-/**
- * Validacao das rotas de autenticacao.
- * @check para verificar os valores em todos os campos (headers, cookies, body, url, etc.).
- * @body para verificar os valores no corpo da requisicao via POST.
- */
-
 exports.loginValidator = body => [
   body("email", "Invalid email format! Try again.")
     .isEmail()

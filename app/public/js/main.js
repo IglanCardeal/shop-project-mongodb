@@ -6,7 +6,7 @@
   const menuToggle = document.querySelector("#side-menu-toggle");
   const userName = document.querySelector('[data="user-name"]');
   const mobileUserName = document.querySelector('[data="mobile-user-name"]');
-  const token = document.querySelector('[data="token"]').value;
+  const token = document.querySelector('[data="token"]') ? document.querySelector('[data="token"]').value : null;
 
   const initAjax = isMobile => {
     if (userName != undefined) {

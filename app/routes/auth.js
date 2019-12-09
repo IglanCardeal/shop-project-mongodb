@@ -1,10 +1,3 @@
-/**
- * @authRoutes
- * @expressValidator
- * Definicao das rotas de autenticacao e validacao de dados de usuario
- * para login, cadastro e redefinicao de senha.
- */
-
 const express = require("express");
 const authController = require("../controllers/auth-controller");
 const checkIfIsLoggedIn = require("../../middleware/check-logged-status");

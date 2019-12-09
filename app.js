@@ -29,6 +29,7 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 const fileUploadHandler = require("./middleware/file-upload-handler");
+const { unhandledException } = require("./errors/errors-log-handler");
 const open = require("open");
 
 // Setup do app e armazenamento das sessoes.
@@ -39,13 +40,11 @@ const sessionDataBase = new SessionStore({
 });
 
 // Rotas.
-const adminRoutes = require("./app/routes/admin");
-const shopRoutes = require("./app/routes/shop");
-const authRoutes = require("./app/routes/auth");
+const routes = require('./app/routes/export.routes');
 const errorController = require("./app/controllers/error-controller");
 
 // DataBase connection file.
-const dataBaseConnection = require(path.resolve("database", "connection"));
+const dataBaseConnection = require("./database/connection");
 
 // Middlewares.
 const preventCsrf = require("./middleware/prevent-csrf");
@@ -79,15 +78,20 @@ app.use(checkSession);
 app.use(preventCsrf);
 
 // Setup das rotas.
-app.use("/admin", adminRoutes);
-app.use(shopRoutes);
-app.use(authRoutes);
+app.use(routes);
 app.use(errorController.get404);
 app.use(serverErrorHandler);
 
+// Process para verificar erros nao tratados e salvar nos arquivos de log.
+// verificar possivel error de EMFILE devido abertura de arquivos para gravar logs de erros.
 process.on("uncaughtException", error => {
-  console.log("Uncaught Error while starting: ", error);
-  process.exit(1);
+  const filepath = path.join(__dirname, "/logs/uncaught-exception-errors.log");
+  unhandledException(error, filepath, "uncaughtException");
+});
+
+process.on("unhandledRejection", error => {
+  const filepath = path.join(__dirname, "/logs/unhandled-rejection-errors.log");
+  unhandledException(error, filepath, "unhandledRejection");
 });
 
 try {
