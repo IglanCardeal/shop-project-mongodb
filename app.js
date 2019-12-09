@@ -29,7 +29,6 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 const fileUploadHandler = require("./middleware/file-upload-handler");
-const { unhandledException } = require("./errors/errors-log-handler");
 const open = require("open");
 
 // Setup do app e armazenamento das sessoes.
