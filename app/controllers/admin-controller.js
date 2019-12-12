@@ -1,9 +1,3 @@
-/**
- * @admincontrols
- * Controle de usuarios cadastrados para editar, adicionar e excluir produtos
- * e controle de dados da conta.
- */
-
 const Product = require("../models/product");
 const { validationResult } = require("express-validator/check");
 
@@ -39,17 +33,20 @@ exports.getAddProduct = (req, res, next) => {
 exports.getProducts = async (req, res, next) => {
   const page = Math.floor(+req.query.page) || 1;
   const userId = req.user._id;
+
   try {
     const products = await Product.find({ userId: userId })
       .skip((page - 1) * ITEMS_PER_PAGE)
       .limit(ITEMS_PER_PAGE)
       .exec();
+
     const paginationObject = await paginationFunction(
       page,
       Product,
       ITEMS_PER_PAGE,
       userId
     );
+
     return res.render("admin/products", {
       prods: products,
       pageTitle: "Admin Products",
@@ -58,7 +55,6 @@ exports.getProducts = async (req, res, next) => {
       ...paginationObject
     });
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -73,6 +69,7 @@ exports.postAddProduct = async (req, res, next) => {
   const newBook = req.body;
   const userId = req.user._id;
   const image = req.file;
+
   const postAddError = (res, title, price, description, errorMsg) => {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
@@ -85,7 +82,9 @@ exports.postAddProduct = async (req, res, next) => {
       error: errorMsg
     });
   };
+
   let errors = validationResult(req);
+
   if (!image) {
     return postAddError(
       res,
@@ -95,6 +94,7 @@ exports.postAddProduct = async (req, res, next) => {
       "No image file was attached! Please insert some image of the product."
     );
   }
+
   if (!errors.isEmpty()) {
     return postAddError(
       res,
@@ -104,6 +104,7 @@ exports.postAddProduct = async (req, res, next) => {
       errors.array()[0].msg
     );
   }
+
   const product = new Product({
     title: newBook.title,
     price: newBook.price,
@@ -111,11 +112,12 @@ exports.postAddProduct = async (req, res, next) => {
     imageUrl: image.path,
     userId: userId
   });
+
   try {
     await product.save();
+
     return res.redirect("/admin/products");
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -130,14 +132,17 @@ exports.getEditProduct = async (req, res, next) => {
   const { edit } = req.query;
   const { productId } = req.params;
   const userId = req.user._id;
+
   if (!edit) {
     return res.redirect("/");
   }
+
   try {
     const product = await Product.findOne({
       _id: productId,
       userId: userId
     }).exec();
+
     return res.render("admin/edit-product", {
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
@@ -146,7 +151,6 @@ exports.getEditProduct = async (req, res, next) => {
       error: null
     });
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -162,7 +166,9 @@ exports.postEditProduct = async (req, res, next) => {
   const userId = req.user._id;
   const image = req.file;
   const { productId } = req.body;
+
   let errors = validationResult(req);
+
   if (!errors.isEmpty()) {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
@@ -177,26 +183,30 @@ exports.postEditProduct = async (req, res, next) => {
       editing: true
     });
   }
+
   try {
     const product = await Product.findOne({
       _id: productId,
       userId: userId
     }).exec();
+
     if (!product) {
       req.flash("error", "The product do not belongs to your account!");
       return res.redirect("/admin/products");
     }
+
     product.title = newBook.title;
     product.price = newBook.price;
     product.description = newBook.description;
+
     if (image) {
       deleteFile(product.imageUrl);
       product.imageUrl = image.path;
     }
+
     await product.save();
     return res.redirect("/admin/products");
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -210,16 +220,18 @@ exports.postEditProduct = async (req, res, next) => {
 exports.deleteProduct = async (req, res, next) => {
   const productId = req.params.productId;
   const userId = req.user._id;
+
   try {
     const product = await Product.findById(productId);
     deleteFile(product.imageUrl);
+
     await Product.findOneAndDelete({
       _id: productId,
       userId: userId
     }).exec();
+
     return res.status(200).json({ msg: "Success!" });
   } catch (error) {
-    console.log("-----> Error: ", error);
     return res.status(500).json({ msg: "Delete product fail!" });
   }
 };
@@ -228,8 +240,11 @@ exports.getUser = (req, res) => {
   const { username, email, cart } = req.user;
   const qtyInCart = cart.items.length;
   let productsInCart = "";
+
   if (qtyInCart === 0) productsInCart = `No products in cart.`;
+
   productsInCart = `${qtyInCart} products on cart.`;
+
   return res.render("admin/about-user", {
     pageTitle: "Your Data",
     path: "/user",
@@ -241,6 +256,7 @@ exports.getUser = (req, res) => {
 
 exports.postUserData = async (req, res) => {
   const userData = { username: req.user.username };
+
   res.setHeader("Content-Type", "application/json");
   res.send(JSON.stringify(userData));
 };

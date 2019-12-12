@@ -1,13 +1,3 @@
-/**
- * @usercontrol
- * @sendGrip modulo que usar key de conta para uso de servico de email da aplicacao.
- * Key do sendGrid definida nas variaveis de ambiente.
- * @bcrypt para criacao de hash de senha.
- * @crypto para gerar keys para envio de email.
- * Controller de autenticacao de usuario, criacao de usuario e redefinicao
- * de senha de acesso da conta.
- */
-
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
@@ -25,6 +15,7 @@ const User = require("../models/user");
  * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
  */
 const { catchServerErrorFunction } = require("./error-controller");
+
 const htmlBodyEmail = require("../utils/body-email");
 
 // Informamos ao nodemailer, qual o servico que sera usado para enviar emails.
@@ -54,6 +45,7 @@ exports.getLogin = (req, res) => {
 
 exports.postLogin = async (req, res, next) => {
   const { email, password, keep } = req.body;
+
   const inCaseOfInvalidData = (res, email, errorMsg, field) => {
     return res.status(422).render("auth/login", {
       pageTitle: "Login",
@@ -63,8 +55,10 @@ exports.postLogin = async (req, res, next) => {
       field
     });
   };
+
   try {
     let errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return inCaseOfInvalidData(
         res,
@@ -73,15 +67,19 @@ exports.postLogin = async (req, res, next) => {
         errors.array()[0].param
       );
     }
+
     const user = await User.findOne({
       email: email
     })
       .select("+password")
       .exec();
+
     if (!user) {
       return inCaseOfInvalidData(res, email, "User not found! Try again.", "");
     }
+
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
     if (!isPasswordCorrect) {
       return inCaseOfInvalidData(
         res,
@@ -90,16 +88,19 @@ exports.postLogin = async (req, res, next) => {
         ""
       );
     }
+
     if (keep === "yes") {
       const twelveHours = 86400000 / 2;
       req.session.cookie.maxAge = twelveHours;
     }
+
     req.session.isLoggedIn = true;
     req.session.userId = user._id;
+
     await req.session.save();
+
     return res.redirect("/");
   } catch (error) {
-    console.log("Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -113,9 +114,9 @@ exports.postLogin = async (req, res, next) => {
 exports.postLogout = async (req, res, next) => {
   try {
     await req.session.destroy();
+
     return res.redirect("/login");
   } catch (error) {
-    console.log("Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -139,8 +140,10 @@ exports.getSignup = (req, res) => {
 
 exports.postSignup = async (req, res, next) => {
   const { username, email, password } = req.body;
+
   try {
     let errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(422).render("auth/signup", {
         pageTitle: "Signup",
@@ -151,7 +154,9 @@ exports.postSignup = async (req, res, next) => {
         field: errors.array()[0].param
       });
     }
+
     const emailAlreadyExist = await User.findOne({ email: email });
+
     if (emailAlreadyExist) {
       return res.status(422).render("auth/signup", {
         pageTitle: "Signup",
@@ -162,17 +167,21 @@ exports.postSignup = async (req, res, next) => {
         field: "email"
       });
     }
+
     const hashedPassword = await bcrypt.hash(password, 12);
+
     const newUser = new User({
       username,
       email,
       password: hashedPassword
     });
+
     await newUser.save();
+
     req.flash("error", "Account created. Log in!");
+
     return res.redirect("/login");
   } catch (error) {
-    console.log("Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -195,6 +204,7 @@ exports.getReset = (req, res) => {
 
 exports.postReset = async (req, res, next) => {
   const { email } = req.body;
+
   const generateRandomToken = async () => {
     return new Promise((resolve, reject) => {
       crypto.randomBytes(32, (error, buffer) => {
@@ -205,8 +215,10 @@ exports.postReset = async (req, res, next) => {
       });
     });
   };
+
   try {
     const user = await User.findOne({ email: email });
+
     if (!user) {
       return res.render("auth/reset-password", {
         pageTitle: "Reset Password",
@@ -216,11 +228,15 @@ exports.postReset = async (req, res, next) => {
         error: "No account found! Try another email."
       });
     }
+
     const token = await generateRandomToken();
     user.resetToken = token;
+
     // 1 hora para expirar o token.
     user.tokenExpiration = Date.now() + 3600000;
+
     await user.save();
+
     transport.sendMail({
       to: email,
       // to: "your@gmail.com", // email de teste
@@ -228,13 +244,13 @@ exports.postReset = async (req, res, next) => {
       subject: "Reseting your account password on Online Shop Project",
       html: htmlBodyEmail(`${req.protocol}://${req.get("host")}`, token)
     });
+
     res.render("auth/mailed", {
       pageTitle: "Email Sended",
       path: "/mailed",
       msg: "Email sended to your email account! Check it out."
     });
   } catch (error) {
-    console.log("Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -247,11 +263,13 @@ exports.postReset = async (req, res, next) => {
 
 exports.getResetToken = async (req, res, next) => {
   const token = req.params.token;
+
   try {
     const user = await User.findOne({
       resetToken: token,
       tokenExpiration: { $gt: Date.now() }
     });
+
     if (!user) {
       return inCaseOfNoUserFoundToResetPassword(
         req,
@@ -259,6 +277,7 @@ exports.getResetToken = async (req, res, next) => {
         "Time to reset password expired! Try again."
       );
     }
+
     return res.render("auth/set-new-password", {
       pageTitle: "Set New Password",
       path: "/set-new-password",
@@ -267,7 +286,6 @@ exports.getResetToken = async (req, res, next) => {
       token
     });
   } catch (error) {
-    console.log("Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -280,16 +298,19 @@ exports.getResetToken = async (req, res, next) => {
 
 exports.postSetNewPassword = async (req, res, next) => {
   const { password, confirmPassword, userId, token } = req.body;
+
   if (!(password === confirmPassword)) {
     req.flash("error", "The passwords are not equal!");
     return res.redirect(`/reset/${token}`);
   }
+
   try {
     const user = await User.findOne({
       _id: userId,
       resetToken: token,
       tokenExpiration: { $gt: Date.now() }
     });
+
     if (!user) {
       return inCaseOfNoUserFoundToResetPassword(
         req,
@@ -297,13 +318,16 @@ exports.postSetNewPassword = async (req, res, next) => {
         "Unable to reset password! Send your email again and try again later."
       );
     }
+
     user.password = await bcrypt.hash(password, 12);
     user.resetToken = user.tokenExpiration = undefined; // reset de token e tempo de expiracao.
+
     await user.save();
+
     req.flash("error", "Your password has been reset! Try to login now.");
+
     return res.redirect("/login");
   } catch (error) {
-    console.log("Error: ", error);
     return catchServerErrorFunction(
       error,
       500,

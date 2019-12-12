@@ -1,16 +1,3 @@
-/**
- * @onlineshopproject
- * @author Iglan Cardeal
- * @githubrespository https://github.com/IglanCardeal/shop-project-mongodb
- * Projeto de shop online feito em NodeJS, Express e MongoDB.
- */
-
-/**
- * @PRECISA_TERMINAR
- * 1 - valiadacao front-end para os campos de login no arquivo `login.js`.
- * 2 - separar e reorganizar o HTML da pagina para envio de e-mail de reset de password.
- */
-
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -63,12 +50,15 @@ app.use(helmet());
 app.use(session(sessionSetup(sessionDataBase)));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Armazenamento de imgs.
 app.use(
   multer({
     storage: fileUploadHandler(multer).fileStorage,
     fileFilter: fileUploadHandler(multer).fileFilter
   }).single("image")
 );
+
 app.use(express.static(path.join(__dirname, "app", "public")));
 app.use(express.static(path.join(__dirname))); // para arquivos de imagens de usuario.
 app.use(csrf());

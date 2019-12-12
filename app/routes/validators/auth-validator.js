@@ -1,5 +1,6 @@
 exports.loginValidator = body => [
   body("email", "Invalid email format! Try again.")
+    .trim()
     .isEmail()
     .normalizeEmail(),
   body("password", "Invalid password format! Try again.")
