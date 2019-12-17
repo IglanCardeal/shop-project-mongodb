@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /**
  * @productsshow
  * Controller para exibicao de produtos, detalhes de produtos, carrinhos de compras
@@ -5,16 +6,13 @@
  * @catchServerErrorFunction funcao que executa tratamento de erros.
  */
 
-const dotenv = require("dotenv");
-dotenv.config();
+const PDFDocumentation = require('pdfkit')
+const fs = require('fs')
+const path = require('path')
 
-const Product = require("../models/product");
-const Order = require("../models/order");
+const Product = require('../models/product')
+const Order = require('../models/order')
 
-const fs = require("fs");
-const path = require("path");
-
-const PDFDocumentation = require("pdfkit");
 // const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY;
 // const stripe = require("stripe")(STRIPE_PRIVATE_KEY);
 
@@ -26,178 +24,210 @@ const PDFDocumentation = require("pdfkit");
  * next.
  * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
  */
-const { catchServerErrorFunction } = require("./error-controller");
+const { catchServerErrorFunction } = require('./error-controller')
 
-const paginationFunction = require("../utils/pagination-function");
-const ITEMS_PER_PAGE = 3;
+const paginationFunction = require('../utils/pagination-function')
+
+const ITEMS_PER_PAGE = 3
+
+const getDataFromCart = products => {
+  const productsData = []
+  const idsArray = []
+  let totalPrice = 0
+
+  products.forEach(order => {
+    totalPrice += order.quantity * order.productId.price
+    idsArray.push(order.productId._id)
+    productsData.push({
+      data: order.productId,
+      quantity: order.quantity,
+    })
+  })
+
+  return {
+    idsArray,
+    productsData,
+    totalPrice,
+  }
+}
 
 exports.getIndex = async (req, res, next) => {
   try {
-    let page = Math.floor(+req.query.page) || 1; // evita que numeros float ou string sejam atribuidas ao page.
+    const page = Math.floor(+req.query.page) || 1 // evita que numeros float ou string sejam atribuidas ao page.
+
     const products = await Product.find()
       .skip((page - 1) * ITEMS_PER_PAGE) // quantidade de n primeiros items a ignorar na consulta.
       .limit(ITEMS_PER_PAGE) // limite de retorno da query.
-      .select("-userId") // ignora o id do usuario.
-      .exec();
+      .select('-userId') // ignora o id do usuario.
+      .exec()
+
     const paginationObject = await paginationFunction(
       page,
       Product,
       ITEMS_PER_PAGE
-    );
-    return res.render("shop/index", {
+    )
+
+    return res.render('shop/index', {
       prods: products,
-      pageTitle: "Shop",
-      path: "/",
+      pageTitle: 'Shop',
+      path: '/',
       isAuthenticated: req.session.isLoggedIn,
-      ...paginationObject
-    });
+      ...paginationObject,
+    })
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to list products!",
+      'Unable to list products!',
       false,
       next
-    );
+    )
   }
-};
+}
 
 exports.getProducts = async (req, res, next) => {
   try {
-    let page = Math.floor(+req.query.page) || 1;
+    const page = Math.floor(+req.query.page) || 1
+
     const products = await Product.find()
       .skip((page - 1) * ITEMS_PER_PAGE)
       .limit(ITEMS_PER_PAGE)
-      .select("-userId")
-      .exec();
+      .select('-userId')
+      .exec()
+
     const paginationObject = await paginationFunction(
       page,
       Product,
       ITEMS_PER_PAGE
-    );
-    return res.render("shop/product-list", {
+    )
+
+    return res.render('shop/product-list', {
       prods: products,
-      pageTitle: "All Products",
-      path: "/products",
+      pageTitle: 'All Products',
+      path: '/products',
       isAuthenticated: req.session.isLoggedIn,
-      ...paginationObject
-    });
+      ...paginationObject,
+    })
   } catch (error) {
-    console.log("-----> Error: ", error);
-    return catchServerErrorFunction(
+    catchServerErrorFunction(
       error,
       500,
-      "Unable to list products!",
+      'Unable to list products!',
       false,
       next
-    );
+    )
   }
-};
+}
 
 exports.getProduct = async (req, res, next) => {
-  const { productId } = req.params;
+  const { productId } = req.params
+
   try {
     const product = await Product.findById(productId)
-      .select("-userId")
-      .exec();
-    return res.render("shop/product-detail", {
-      product: product,
+      .select('-userId')
+      .exec()
+
+    return res.render('shop/product-detail', {
+      product,
       pageTitle: product.title,
-      path: "/products",
-      isAuthenticated: req.session.isLoggedIn
-    });
+      path: '/products',
+      isAuthenticated: req.session.isLoggedIn,
+    })
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to get the product!",
+      'Unable to get the product!',
       false,
       next
-    );
+    )
   }
-};
+}
 
-exports.getCart = (req, res, next) => {
-  res.render("shop/cart", {
-    path: "/cart",
-    pageTitle: "Your Cart"
-  });
-};
+exports.getCart = (req, res) => {
+  res.render('shop/cart', {
+    path: '/cart',
+    pageTitle: 'Your Cart',
+  })
+}
 
 exports.ajaxGetCart = async (req, res, next) => {
   try {
-    const user = await req.user.populate("cart.items.productId").execPopulate();
-    const products = user.cart.items;
-    const jsonData = getDataFromCart(products);
-    return res.send(JSON.stringify(jsonData));
+    const user = await req.user.populate('cart.items.productId').execPopulate()
+
+    const products = user.cart.items
+
+    const jsonData = getDataFromCart(products)
+
+    return res.send(JSON.stringify(jsonData))
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to get the products in cart!",
+      'Unable to get the products in cart!',
       true,
       next
-    );
+    )
   }
-};
+}
 
 exports.postCart = async (req, res, next) => {
-  const { productId } = req.body;
+  const { productId } = req.body
+
   try {
-    await req.user.addProductToCart(productId);
-    return res.redirect("/cart");
+    await req.user.addProductToCart(productId)
+
+    return res.redirect('/cart')
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to add a product to cart!",
+      'Unable to add a product to cart!',
       false,
       next
-    );
+    )
   }
-};
+}
 
 exports.postCartControlQuantity = async (req, res, next) => {
   try {
-    const { action, productId } = req.body;
-    if (action === "increase" || action === "decrease") {
-      await req.user.addProductToCart(productId, action);
+    const { action, productId } = req.body
+
+    if (action === 'increase' || action === 'decrease') {
+      await req.user.addProductToCart(productId, action)
     }
-    if (action === "delete") {
-      await req.user.removeProductFromCart(productId);
+
+    if (action === 'delete') {
+      await req.user.removeProductFromCart(productId)
     }
-    return res.status(200).json();
+
+    return res.status(200).json()
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to control the products in cart!",
+      'Unable to control the products in cart!',
       true,
       next
-    );
+    )
   }
-};
+}
 
 exports.postCartDeleteProduct = async (req, res, next) => {
   try {
-    await req.user.removeProductFromCart(req.body.productId);
-    return res.redirect("/cart");
+    await req.user.removeProductFromCart(req.body.productId)
+
+    return res.redirect('/cart')
   } catch (error) {
-    console.log("-----> Error: ", error);
-    return catchServerErrorFunction(
+    catchServerErrorFunction(
       error,
       500,
-      "Unable to delete the product from cart!",
+      'Unable to delete the product from cart!',
       false,
       next
-    );
+    )
   }
-};
+}
 
 /** 
  ========== Dois metodos usados para pagamento com a API @Stripe ========== 
@@ -277,7 +307,6 @@ exports.getCheckoutSuccess = async (req, res, next) => {
     await req.user.clearCart();
     return res.redirect("/orders");
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
@@ -291,180 +320,181 @@ exports.getCheckoutSuccess = async (req, res, next) => {
 
 exports.getCheckout = async (req, res, next) => {
   try {
-    const user = await req.user.populate("cart.items.productId").execPopulate();
-    const products = user.cart.items;
-    let total = 0;
+    const user = await req.user.populate('cart.items.productId').execPopulate()
+
+    const products = user.cart.items
+
+    let total = 0
+
     products.forEach(prod => {
-      total += prod.quantity * prod.productId.price;
-    });
-    return res.render("shop/checkout", {
-      path: "/checkout",
-      pageTitle: "Checkout",
-      products: products,
+      total += prod.quantity * prod.productId.price
+    })
+
+    return res.render('shop/checkout', {
+      path: '/checkout',
+      pageTitle: 'Checkout',
+      products,
       totalSum: total,
-      isAuthenticated: req.session.isLoggedIn
-    });
+      isAuthenticated: req.session.isLoggedIn,
+    })
   } catch (error) {
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to process your payment! Try again later.",
+      'Unable to process your payment! Try again later.',
       false,
       next
-    );
+    )
   }
-};
+}
 
 exports.getOrders = async (req, res, next) => {
   try {
     const userOrders = await Order.find({
-      "user.userId": req.user._id
-    }).exec();
-    return res.render("shop/orders", {
-      path: "/orders",
-      pageTitle: "Your Orders",
-      orders: userOrders
-    });
+      'user.userId': req.user._id,
+    }).exec()
+
+    return res.render('shop/orders', {
+      path: '/orders',
+      pageTitle: 'Your Orders',
+      orders: userOrders,
+    })
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to get orders!",
+      'Unable to get orders!',
       false,
       next
-    );
+    )
   }
-};
+}
 
 exports.postOrder = async (req, res, next) => {
   const getProductsToOrder = user => {
-    let totalPrice = 0;
-    let cartProducts = user.cart.items.map(item => {
-      totalPrice += item.productId._doc.price * item.quantity;
+    let totalPrice = 0
+
+    const cartProducts = user.cart.items.map(item => {
+      totalPrice += item.productId._doc.price * item.quantity
       return {
         // '._doc' extrai todos os dados do documento relacionado.
         product: { ...item.productId._doc },
-        quantity: item.quantity
-      };
-    });
-    return { cartProducts, totalPrice };
-  };
+        quantity: item.quantity,
+      }
+    })
+
+    return { cartProducts, totalPrice }
+  }
+
   try {
-    const user = await req.user.populate("cart.items.productId").execPopulate();
+    const user = await req.user.populate('cart.items.productId').execPopulate()
+
     const order = new Order({
       user: {
         email: req.user.email,
-        userId: req.user._id
+        userId: req.user._id,
       },
       totalPrice: getProductsToOrder(user).totalPrice,
-      products: getProductsToOrder(user).cartProducts
-    });
-    await order.save();
-    await req.user.clearCart();
-    return res.redirect("/orders");
+      products: getProductsToOrder(user).cartProducts,
+    })
+
+    await order.save()
+
+    await req.user.clearCart()
+
+    return res.redirect('/orders')
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to add new orders!",
+      'Unable to add new orders!',
       false,
       next
-    );
+    )
   }
-};
+}
 
 exports.getInvoice = async (req, res, next) => {
-  const orderId = req.params.orderId;
-  const userId = req.user._id;
-  const invoiceFileName = "invoice-" + orderId + ".pdf";
-  const currentYear = new Date().getFullYear().toString();
+  const { orderId } = req.params
+  const userId = req.user._id
+
+  const invoiceFileName = `invoice-${orderId}.pdf`
+
+  const currentYear = new Date().getFullYear().toString()
+
   const invoicePath = path.join(
-    "app",
-    "public",
-    "invoices",
+    'app',
+    'public',
+    'invoices',
     currentYear,
     invoiceFileName
-  );
+  )
+
   try {
-    const order = await Order.findById(orderId).exec();
+    const order = await Order.findById(orderId).exec()
+
     if (!order) {
       return catchServerErrorFunction(
-        error,
+        new Error('No orders here!'),
         404,
-        "No order related to user found!",
+        'No order related to user found!',
         false,
         next
-      );
+      )
     }
+
     const orderBelongsToUser = Boolean(
       order.user.userId.toString() === userId.toString()
-    );
+    )
+
     if (!orderBelongsToUser) {
       return catchServerErrorFunction(
-        error,
+        new Error('Unauthorized action!'),
         401,
-        "Unauthorized request denied!",
+        'Unauthorized request denied!',
         false,
         next
-      );
+      )
     }
+
     // gerando arquivos pdf.
-    const pdfDoc = new PDFDocumentation();
-    pdfDoc.pipe(fs.createWriteStream(invoicePath));
-    pdfDoc.pipe(res);
-    res.setHeader("Content-Type", "application/pdf"); // permite o browser identificar o tipo de arquivo.
+    const pdfDoc = new PDFDocumentation()
+    pdfDoc.pipe(fs.createWriteStream(invoicePath))
+    pdfDoc.pipe(res)
+    res.setHeader('Content-Type', 'application/pdf') // permite o browser identificar o tipo de arquivo.
     res.setHeader(
       // deifni como sera exibido pelo browser. Realiza download do arquivo.
-      "Content-Disposition",
-      'attachement; filename="' + invoiceFileName + '"'
-    );
-    pdfDoc.fontSize(28).text("INVOICE", { align: "center" });
+      'Content-Disposition',
+      `attachement; filename="${invoiceFileName}"`
+    )
+    pdfDoc.fontSize(28).text('INVOICE', { align: 'center' })
     pdfDoc.text(` ------- Orders from ${req.user.username} ------- `, {
-      align: "center"
-    });
-    let totalprice = 0;
+      align: 'center',
+    })
+
+    let totalprice = 0
+
     order.products.forEach(prod => {
-      totalprice += prod.quantity * prod.product.price;
+      totalprice += prod.quantity * prod.product.price
       pdfDoc.text(
         `
       ${prod.product.title} - ${prod.quantity} x $${prod.product.price}
       `,
         {
-          align: "left"
+          align: 'left',
         }
-      );
-    });
-    pdfDoc.text(`Total Price: $${totalprice}`, { align: "center" });
-    pdfDoc.end();
+      )
+    })
+
+    pdfDoc.text(`Total Price: $${totalprice}`, { align: 'center' })
+    pdfDoc.end()
   } catch (error) {
-    console.log("-----> Error: ", error);
     return catchServerErrorFunction(
       error,
       500,
-      "Unable to generate the invoice file!",
+      'Unable to generate the invoice file!',
       false,
       next
-    );
+    )
   }
-};
-
-const getDataFromCart = products => {
-  const productsData = [];
-  const idsArray = [];
-  let totalPrice = 0;
-  products.forEach(order => {
-    totalPrice += order.quantity * order.productId.price;
-    idsArray.push(order.productId._id);
-    productsData.push({
-      data: order.productId,
-      quantity: order.quantity
-    });
-  });
-  return {
-    idsArray: idsArray,
-    productsData: productsData,
-    totalPrice: totalPrice
-  };
-};
+}

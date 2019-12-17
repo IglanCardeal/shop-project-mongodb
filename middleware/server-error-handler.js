@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * @errorhandler middleware para tratamento de erros de servidor.
  * @params recebe ojbeto de erro com mensagem de erro, Http Status Code
@@ -6,25 +7,29 @@
  * controllers.
  */
 
-const { join } = require("path");
-const generateLogErrors = require("../errors/errors-log-handler");
+const { join } = require('path')
+const generateLogErrors = require('../errors/errors-log-handler')
 
 module.exports = (error, req, res, next) => {
-  const message = error.errorMsg;
-  const filepath = join(__dirname, "../logs/errors.log");
-  generateLogErrors(error, filepath, error.statusCode);
+  const message = error.errorMsg
+
+  const filepath = join(__dirname, '../logs/errors.log')
+
+  generateLogErrors(error, filepath, error.statusCode)
+
   if (error.isAjax) {
     return res.status(error.httpStatusCode).json({
-      title: "Server Error",
+      title: 'Server Error',
       msg: message,
-      status: "500 - internal server error!"
-    });
+      status: '500 - internal server error!',
+    })
   }
-  return res.status(error.httpStatusCode).render("404", {
-    pageTitle: "Server Error",
-    path: "",
+
+  return res.status(error.httpStatusCode).render('404', {
+    pageTitle: 'Server Error',
+    path: '',
     msg: message,
-    status: "500 - internal server error!",
+    status: '500 - internal server error!',
     isAuthenticated: req.session.isLoggedIn
-  });
-};
+  })
+}

@@ -1,45 +1,46 @@
-const express = require("express");
-const authController = require("../controllers/auth-controller");
-const checkIfIsLoggedIn = require("../../middleware/check-logged-status");
-const Router = express.Router();
+const express = require('express')
+const { check, body } = require('express-validator/check')
+const authController = require('../controllers/auth-controller')
+const checkIfIsLoggedIn = require('../../middleware/check-logged-status')
 
-const { check, body } = require("express-validator/check");
-const authValidator = require("./validators/auth-validator");
+const Router = express.Router()
 
-Router.get("/login", checkIfIsLoggedIn, authController.getLogin);
+const authValidator = require('./validators/auth-validator')
 
-Router.get("/signup", checkIfIsLoggedIn, authController.getSignup);
+Router.get('/login', checkIfIsLoggedIn, authController.getLogin)
 
-Router.get("/reset-password", authController.getReset);
+Router.get('/signup', checkIfIsLoggedIn, authController.getSignup)
 
-Router.get("/reset/:token", authController.getResetToken);
+Router.get('/reset-password', authController.getReset)
+
+Router.get('/reset/:token', authController.getResetToken)
 
 Router.post(
-  "/login",
+  '/login',
   checkIfIsLoggedIn,
   authValidator.loginValidator(body),
   authController.postLogin
-);
+)
 
-Router.post("/logout", authController.postLogout);
+Router.post('/logout', authController.postLogout)
 
 Router.post(
-  "/signup",
+  '/signup',
   checkIfIsLoggedIn,
   authValidator.signupValidator(check, body),
   authController.postSignup
-);
+)
 
 Router.post(
-  "/reset-password",
-  body("email", "Invalid email format! Try again.").isEmail(),
+  '/reset-password',
+  body('email', 'Invalid email format! Try again.').isEmail(),
   authController.postReset
-);
+)
 
 Router.post(
-  "/set-new-password",
+  '/set-new-password',
   authValidator.resetPassValidator(body),
   authController.postSetNewPassword
-);
+)
 
-module.exports = Router;
+module.exports = Router

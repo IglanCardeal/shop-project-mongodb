@@ -1,11 +1,11 @@
-const routes = require("express").Router();
+const routes = require('express').Router()
 
-const adminRoutes = require("./admin");
-const shopRoutes = require("./shop");
-const authRoutes = require("./auth");
+const adminRoutes = require('./admin')
+const shopRoutes = require('./shop')
+const authRoutes = require('./auth')
 
-routes.use("/admin", adminRoutes);
-routes.use(shopRoutes);
-routes.use(authRoutes);
+routes.use('/admin', adminRoutes)
+routes.use(shopRoutes)
+routes.use(authRoutes)
 
-module.exports = routes;
+module.exports = routes
