@@ -1,7 +1,7 @@
 /* eslint-disable no-plusplus */
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const { Schema } = mongoose
+const { Schema } = mongoose;
 
 // *************************************************************
 // Model de usuarios.
@@ -57,70 +57,83 @@ const userSchema = new Schema({
     type: Date,
     required: false,
   },
-})
+});
 
 // Adiciona Product ao Cart e controla a quantidade de products no cart.
-userSchema.methods.addProductToCart = async function (productId, action = null) {
+userSchema.methods.addProductToCart = async function(productId, action = null) {
   // this refere ao schema user pois se usa funcoes normais.
-  const updateCartItems = [...this.cart.items]
+  const updateCartItems = [...this.cart.items];
 
   const cartProductIndex = this.cart.items.findIndex(cp => {
-    if (cp.productId === undefined) return -1
-    return cp.productId.toString() === productId
-  })
+    if (cp.productId === undefined) return -1;
+    return cp.productId.toString() === productId;
+  });
 
   const doIncrease = Boolean(
     cartProductIndex >= 0 && (action === null || action === 'increase')
-  )
+  );
 
-  const doDecrease = Boolean(cartProductIndex >= 0 && action === 'decrease')
+  const doDecrease = Boolean(cartProductIndex >= 0 && action === 'decrease');
 
-  if (doIncrease) updateCartItems[cartProductIndex].quantity++
+  if (doIncrease) updateCartItems[Number(cartProductIndex)].quantity++;
 
   if (doDecrease) {
-    updateCartItems[cartProductIndex].quantity--
+    updateCartItems[Number(cartProductIndex)].quantity--;
 
-    if (updateCartItems[cartProductIndex].quantity === 0)
-      updateCartItems.splice(cartProductIndex, 1)
+    if (updateCartItems[Number(cartProductIndex)].quantity === 0)
+      updateCartItems.splice(cartProductIndex, 1);
   }
 
   // se nao existe, adiciona
   if (cartProductIndex === -1)
-    updateCartItems.push({ productId: productId, quantity: 1 })
+    updateCartItems.push({ productId: productId, quantity: 1 });
 
-  const updateCart = { items: updateCartItems }
+  const updateCart = { items: updateCartItems };
 
-  this.cart = updateCart
+  this.cart = updateCart;
 
   try {
-    await this.save()
+    await this.save();
 
-    return
+    return;
   } catch (error) {
-    console.log('=> Error on model: ', error)
-
     throw new Error(
-      'Unable to add a product to cart on addProductToCart() method!'
-    )
+      `Unable to add a product to cart on addProductToCart() method!\n
+      ${error.message}`
+    );
   }
-}
+};
 
 // Remove Product do Cart
-userSchema.methods.removeProductFromCart = async function (productId) {
+userSchema.methods.removeProductFromCart = async function(productId) {
   const updateCartItems = this.cart.items.filter(item => {
-    return item.productId.toString() !== productId.toString()
-  })
+    return item.productId.toString() !== productId.toString();
+  });
 
-  this.cart.items = updateCartItems
+  this.cart.items = updateCartItems;
 
-  await this.save()
-}
+  try {
+    await this.save();
+  } catch (error) {
+    throw new Error(
+      `Unable to delete a product from cart on removeProductFromCart() method!\n
+      ${error.message}`
+    );
+  }
+};
 
 // Remove e limpa todos os Products do Cart
-userSchema.methods.clearCart = async function () {
-  this.cart.items = []
+userSchema.methods.clearCart = async function() {
+  this.cart.items = [];
 
-  await this.save()
-}
+  try {
+    await this.save();
+  } catch (error) {
+    throw new Error(
+      `Unable to clear cart on clearCart() method!\n
+      ${error.message}`
+    );
+  }
+};
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('User', userSchema);

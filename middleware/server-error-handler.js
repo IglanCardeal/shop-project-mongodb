@@ -7,22 +7,22 @@
  * controllers.
  */
 
-const { join } = require('path')
-const generateLogErrors = require('../errors/errors-log-handler')
+const { join } = require('path');
+const generateLogErrors = require('../errors/errors-log-handler');
 
 module.exports = (error, req, res, next) => {
-  const message = error.errorMsg
+  const message = error.errorMsg;
 
-  const filepath = join(__dirname, '../logs/errors.log')
+  const filepath = join(__dirname, '../logs/errors.log');
 
-  generateLogErrors(error, filepath, error.statusCode)
+  generateLogErrors(error, filepath, error.statusCode);
 
   if (error.isAjax) {
     return res.status(error.httpStatusCode).json({
       title: 'Server Error',
       msg: message,
       status: '500 - internal server error!',
-    })
+    });
   }
 
   return res.status(error.httpStatusCode).render('404', {
@@ -30,6 +30,6 @@ module.exports = (error, req, res, next) => {
     path: '',
     msg: message,
     status: '500 - internal server error!',
-    isAuthenticated: req.session.isLoggedIn
-  })
-}
+    isAuthenticated: req.session.isLoggedIn,
+  });
+};

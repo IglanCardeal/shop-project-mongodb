@@ -1,10 +1,9 @@
-const crypto = require('crypto')
+const crypto = require('crypto');
 
 const destinationBasedOnDate = () => {
-  const date = new Date()
+  const date = new Date();
 
-  const currentYear = date.getFullYear().toString()
-  const currentMonth = date.getMonth().toString()
+  const currentYear = date.getFullYear().toString();
 
   const months = [
     'jan',
@@ -19,28 +18,29 @@ const destinationBasedOnDate = () => {
     'out',
     'nov',
     'dez',
-  ]
+  ];
 
-  const equivalentMonth = months[currentMonth]
+  const equivalentMonth = months[date.getMonth().toString()];
 
   return {
     currentYear,
     equivalentMonth,
-  }
-}
+  };
+};
 
 module.exports = multer => {
   // Trata upload de arquivos.
-  const directoryBasedOnDate = destinationBasedOnDate()
+  const directoryBasedOnDate = destinationBasedOnDate();
 
   const fileStorage = multer.diskStorage({
     destination: `app/public/users/${directoryBasedOnDate.currentYear}/${directoryBasedOnDate.equivalentMonth}`, // local de armazenameto.
     filename: (req, file, callback) => {
-      const randomFileName = crypto.randomBytes(16).toString('hex') + Date.now() // gera codido de tamanho 16 +
+      const randomFileName =
+        crypto.randomBytes(16).toString('hex') + Date.now(); // gera codido de tamanho 16 +
 
-      callback(null, `${randomFileName}.png`)
+      callback(null, `${randomFileName}.png`);
     },
-  })
+  });
 
   const fileFilter = (req, file, callback) => {
     // filtra por tipo de arquivo.
@@ -49,14 +49,14 @@ module.exports = multer => {
       file.mimetype === 'image/jpg' ||
       file.mimetype === 'image/jpeg'
     ) {
-      callback(null, true)
+      callback(null, true);
     } else {
-      callback(null, false)
+      callback(null, false);
     }
-  }
+  };
 
   return {
     fileStorage,
     fileFilter,
-  }
-}
+  };
+};

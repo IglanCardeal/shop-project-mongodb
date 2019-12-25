@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const { Schema } = mongoose
+const { Schema } = mongoose;
 
 const productSchema = new Schema({
   title: {
@@ -28,6 +28,6 @@ const productSchema = new Schema({
     ref: 'User', // referencia ao model User
     required: true,
   },
-})
+});
 
-module.exports = mongoose.model('Product', productSchema) // mongoose ira criar a collection 'products'
+module.exports = mongoose.model('Product', productSchema); // mongoose ira criar a collection 'products'

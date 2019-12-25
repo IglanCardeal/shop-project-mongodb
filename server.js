@@ -1,21 +1,22 @@
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
 
-const dataBaseConnection = require('./database/connection')
-const app = require('./app')
+const dataBaseConnection = require('./database/connection');
+const app = require('./app');
 
-dotenv.config()
+dotenv.config();
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
+const { log } = console;
 
 try {
   dataBaseConnection(() => {
-    console.log('Connection to MongoDB stablished with success!')
+    log('Connection to MongoDB stablished with success!');
 
     app.listen(PORT, () => {
-      console.log(`Server On - PORT ${PORT} `)
-      console.log(`Enviroment: ${process.env.NODE_ENV} `)
-    })
-  })
+      log(`Server On - PORT ${PORT} `);
+      log(`Enviroment: ${process.env.NODE_ENV} `);
+    });
+  });
 } catch (error) {
-  console.log('Error while starting the server: ', error)
+  log('Error while starting the server: ', error);
 }
