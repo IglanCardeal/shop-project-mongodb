@@ -1,6 +1,7 @@
 const crypto = require('crypto');
+const path = require('path');
 
-const destinationBasedOnDate = () => {
+const directoryBasedOnDate = () => {
   const date = new Date();
 
   const currentYear = date.getFullYear().toString();
@@ -30,13 +31,20 @@ const destinationBasedOnDate = () => {
 
 module.exports = multer => {
   // Trata upload de arquivos.
-  const directoryBasedOnDate = destinationBasedOnDate();
+  const { currentYear, equivalentMonth } = directoryBasedOnDate();
 
   const fileStorage = multer.diskStorage({
-    destination: `app/public/users/${directoryBasedOnDate.currentYear}/${directoryBasedOnDate.equivalentMonth}`, // local de armazenameto.
+    // destination: `app/public/users/${currentYear}/${equivalentMonth}`, // local de armazenameto.
+    destination: path.join(
+      'app',
+      'public',
+      'users',
+      currentYear.toString(),
+      equivalentMonth.toString()
+    ),
     filename: (req, file, callback) => {
       const randomFileName =
-        crypto.randomBytes(16).toString('hex') + Date.now(); // gera codido de tamanho 16 +
+        crypto.randomBytes(16).toString('hex') + Date.now();
 
       callback(null, `${randomFileName}.png`);
     },
