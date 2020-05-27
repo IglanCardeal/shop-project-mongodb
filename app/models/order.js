@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const { Schema } = mongoose
+const { Schema } = mongoose;
 
 const ordersSchema = new Schema({
   products: [
@@ -32,6 +32,6 @@ const ordersSchema = new Schema({
       ref: 'User',
     },
   },
-})
+});
 
-module.exports = mongoose.model('Order', ordersSchema)
+module.exports = mongoose.model('Order', ordersSchema);

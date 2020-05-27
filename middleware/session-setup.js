@@ -2,8 +2,24 @@
  * @SessionsAndCookies
  * Definido configuracao das sessoes e cookies.
  */
+const session = require('express-session');
+const SessionStore = require('connect-mongodb-session')(session);
+const dotenv = require('dotenv');
 
-module.exports = dataBase => ({
+dotenv.config();
+
+const HOST = process.env.DB_HOST;
+const PORT = process.env.DB_PORT;
+const DBNAME = process.env.DB_NAME;
+
+const uri = `mongodb://${HOST}:${PORT}/${DBNAME}`;
+
+const sessionDataBase = new SessionStore({
+  uri: uri,
+  collection: 'session',
+});
+
+module.exports = {
   secret: [
     '787hhasn12ks2k1bnbs1qpoiewa10xssd000212Wssadl9112',
     'lord_vader_will_smash_the_rebels',
@@ -17,5 +33,5 @@ module.exports = dataBase => ({
     httpOnly: true, // Cookie nao pode ser lido por JS client side.
     sameSite: true, // envio restrito somente a origem.
   },
-  store: dataBase, // objeto de conexao com o banco.
-})
+  store: sessionDataBase, // objeto de conexao com o banco.
+};

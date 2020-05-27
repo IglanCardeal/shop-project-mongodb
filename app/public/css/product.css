@@ -31,3 +31,8 @@
   color: #fff;
   text-shadow: 0 2px 2px black;
 }
+
+.empty {
+  display: block;
+  text-align: center;
+}
