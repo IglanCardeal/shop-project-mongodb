@@ -3,17 +3,7 @@
 const { validationResult } = require('express-validator/check');
 
 const Product = require('../models/product');
-
-/**
- * catchServerErrorFunction recebe:
- * objeto de error.
- * httpStatusCode.
- * msg de erro, verificacao se chamada e um ajax.
- * next.
- * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
- */
 const { catchServerErrorFunction } = require('./error-controller');
-
 const paginationFunction = require('../utils/pagination-function');
 const { deleteFile } = require('../utils/delete-file');
 
@@ -89,17 +79,17 @@ exports.postAddProduct = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!image) {
-    postAddError(
+    return postAddError(
       res,
       newBook.title,
       newBook.price,
       newBook.description,
-      'No image file was attached! Please insert some image of the product.'
+      'No image file was attached or invalid image format! Please insert some image of the product in format like ".png", ".jpg" or ".jpeg".'
     );
   }
 
   if (!errors.isEmpty()) {
-    postAddError(
+    return postAddError(
       res,
       newBook.title,
       newBook.price,

@@ -1,13 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-/**
- * @productsshow
- * Controller para exibicao de produtos, detalhes de produtos, carrinhos de compras
- *  e ordem de compra.
- * @catchServerErrorFunction funcao que executa tratamento de erros.
- */
-
 const PDFDocumentation = require('pdfkit');
-const fs = require('fs');
+const { createWriteStream } = require('fs');
 const path = require('path');
 
 const Product = require('../models/product');
@@ -16,14 +9,6 @@ const Order = require('../models/order');
 // const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY;
 // const stripe = require("stripe")(STRIPE_PRIVATE_KEY);
 
-/**
- * catchServerErrorFunction recebe:
- * objeto de error.
- * httpStatusCode.
- * msg de erro, verificacao se chamada e um ajax.
- * next.
- * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
- */
 const { catchServerErrorFunction } = require('./error-controller');
 
 const paginationFunction = require('../utils/pagination-function');
@@ -31,6 +16,7 @@ const paginationFunction = require('../utils/pagination-function');
 const ITEMS_PER_PAGE = 3;
 
 const getDataFromCart = products => {
+  // remover este codigo e deixar o controle do carrinho para o servidor.
   const productsData = [];
   const idsArray = [];
   let totalPrice = 0;
@@ -145,13 +131,14 @@ exports.getProduct = async (req, res, next) => {
 };
 
 exports.getCart = (req, res) => {
-  res.render('shop/cart', {
+  return res.render('shop/cart', {
     path: '/cart',
     pageTitle: 'Your Cart',
   });
 };
 
 exports.ajaxGetCart = async (req, res, next) => {
+  // remover este codigo e deixar o controle do carrinho para o servidor.
   try {
     const user = await req.user.populate('cart.items.productId').execPopulate();
 
@@ -191,6 +178,7 @@ exports.postCart = async (req, res, next) => {
 
 exports.postCartControlQuantity = async (req, res, next) => {
   try {
+    // remover este codigo e deixar o controle do carrinho para o servidor.
     const { action, productId } = req.body;
 
     if (action === 'increase' || action === 'decrease') {
@@ -417,7 +405,7 @@ exports.postOrder = async (req, res, next) => {
 // eslint-disable-next-line consistent-return
 exports.getInvoice = async (req, res, next) => {
   const { orderId } = req.params;
-  const userId = req.user._id;
+  const { _id: userId } = req.user;
 
   const invoiceFileName = `invoice-${orderId}.pdf`;
 
@@ -435,7 +423,7 @@ exports.getInvoice = async (req, res, next) => {
     const order = await Order.findById(orderId).exec();
 
     if (!order) {
-      catchServerErrorFunction(
+      return catchServerErrorFunction(
         new Error('No orders here!'),
         404,
         'No order related to user found!',
@@ -449,7 +437,7 @@ exports.getInvoice = async (req, res, next) => {
     );
 
     if (!orderBelongsToUser) {
-      catchServerErrorFunction(
+      return catchServerErrorFunction(
         new Error('Unauthorized action!'),
         401,
         'Unauthorized request denied!',
@@ -460,15 +448,18 @@ exports.getInvoice = async (req, res, next) => {
 
     // gerando arquivos pdf.
     const pdfDoc = new PDFDocumentation();
+
     // eslint-disable-next-line security/detect-non-literal-fs-filename
-    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(createWriteStream(invoicePath));
     pdfDoc.pipe(res);
+
     res.setHeader('Content-Type', 'application/pdf'); // permite o browser identificar o tipo de arquivo.
     res.setHeader(
       // deifni como sera exibido pelo browser. Realiza download do arquivo.
       'Content-Disposition',
       `attachement; filename="${invoiceFileName}"`
     );
+
     pdfDoc.fontSize(28).text('INVOICE', { align: 'center' });
     pdfDoc.text(` ------- Orders from ${req.user.username} ------- `, {
       align: 'center',

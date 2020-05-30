@@ -34,7 +34,6 @@ module.exports = multer => {
   const { currentYear, equivalentMonth } = directoryBasedOnDate();
 
   const fileStorage = multer.diskStorage({
-    // destination: `app/public/users/${currentYear}/${equivalentMonth}`, // local de armazenameto.
     destination: path.join(
       'app',
       'public',
@@ -43,24 +42,22 @@ module.exports = multer => {
       equivalentMonth.toString()
     ),
     filename: (req, file, callback) => {
+      // mantem o formato original da imagem.
       const randomFileName =
         crypto.randomBytes(16).toString('hex') + Date.now();
+      const fileFormat = file.mimetype.split('/')[1];
+      const finalFileName = `${randomFileName}.${fileFormat}`;
 
-      callback(null, `${randomFileName}.png`);
+      callback(null, finalFileName);
     },
   });
 
   const fileFilter = (req, file, callback) => {
-    // filtra por tipo de arquivo.
-    if (
-      file.mimetype === 'image/png' ||
-      file.mimetype === 'image/jpg' ||
-      file.mimetype === 'image/jpeg'
-    ) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
+    const acceptedFormatTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const isValidFormatType = acceptedFormatTypes.includes(file.mimetype);
+
+    if (isValidFormatType) callback(null, true);
+    else callback(null, false);
   };
 
   return {

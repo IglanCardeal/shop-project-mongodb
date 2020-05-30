@@ -1,5 +1,5 @@
 const winston = require('winston');
-const fs = require('fs');
+const { createWriteStream } = require('fs');
 
 const { format, transports } = winston;
 
@@ -12,7 +12,7 @@ module.exports = (error, filepath, status = 500) => {
         format: format.combine(format.colorize({ all: true }), format.simple()),
       }),
       new transports.Stream({
-        stream: fs.createWriteStream(filepath, { flags: 'a' }),
+        stream: createWriteStream(filepath, { flags: 'a' }),
       }),
     ],
   };

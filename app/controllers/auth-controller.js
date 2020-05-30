@@ -6,17 +6,7 @@ const crypto = require('crypto');
 const { validationResult } = require('express-validator/check');
 
 const User = require('../models/user');
-
-/**
- * catchServerErrorFunction recebe:
- * objeto de error.
- * httpStatusCode.
- * msg de erro, verificacao se chamada e um ajax.
- * next.
- * catchServerErrorFunction( @object , @number , @string , @boolean , @next )
- */
 const { catchServerErrorFunction } = require('./error-controller');
-
 const sendGridTransport = require('../utils/sendgrid-transport');
 const htmlBodyEmail = require('../utils/body-email');
 
@@ -214,7 +204,7 @@ exports.postReset = async (req, res, next) => {
     const user = await User.findOne({ email: email });
 
     if (!user) {
-      res.render('auth/reset-password', {
+      return res.render('auth/reset-password', {
         pageTitle: 'Reset Password',
         path: '/reset',
         msg: 'Inform your account email to reset the password.',
@@ -239,13 +229,13 @@ exports.postReset = async (req, res, next) => {
       html: htmlBodyEmail(`${req.protocol}://${req.get('host')}`, token),
     });
 
-    res.render('auth/mailed', {
+    return res.render('auth/mailed', {
       pageTitle: 'Email Sended',
       path: '/mailed',
       msg: 'Email sended to your email account! Check it out.',
     });
   } catch (error) {
-    catchServerErrorFunction(
+    return catchServerErrorFunction(
       error,
       500,
       'Unable to reset your password!',
@@ -292,8 +282,9 @@ exports.getResetToken = async (req, res, next) => {
 
 exports.postSetNewPassword = async (req, res, next) => {
   const { password, confirmPassword, userId, token } = req.body;
+  const passwordsAreEquals = password === confirmPassword;
 
-  if (!(password === confirmPassword)) {
+  if (!passwordsAreEquals) {
     req.flash('error', 'The passwords are not equal!');
     return res.redirect(`/reset/${token}`);
   }

@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
+
 /**
- * @errorhandler middleware para tratamento de erros de servidor.
- * @params recebe ojbeto de erro com mensagem de erro, Http Status Code
  * O status code, msg e estado da autenticacao devem ser informados no objeto 'error'
  * nas chamada da funcao de tratamento 'serverErrorFunction', nos arquivos de
  * controllers.
@@ -17,6 +16,9 @@ module.exports = (error, req, res, next) => {
 
   generateLogErrors(error, filepath, error.statusCode);
 
+  /**
+   * REMOVER ESTE CODIGO PARA ERROS DE CHAMADAS AJAX.
+   */
   if (error.isAjax) {
     return res.status(error.httpStatusCode).json({
       title: 'Server Error',
@@ -24,6 +26,7 @@ module.exports = (error, req, res, next) => {
       status: '500 - internal server error!',
     });
   }
+  // ===============================================
 
   return res.status(error.httpStatusCode).render('404', {
     pageTitle: 'Server Error',
