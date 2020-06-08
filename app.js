@@ -6,6 +6,7 @@ const session = require('express-session');
 const csrf = require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
+const compression = require('compression');
 
 const routes = require('./app/routes/export.routes');
 const errorController = require('./app/controllers/error-controller');
@@ -25,6 +26,7 @@ app.set('view engine', 'ejs');
 app.set('views', './app/views');
 
 app.use(helmet());
+app.use(compression());
 app.use(session(sessionSetup));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
