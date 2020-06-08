@@ -7,7 +7,7 @@
     "dev": "NODE_ENV=development nodemon server.js",
     "start": "NODE_ENV=production pm2 start server.js -i 0",
     "stop": "pm2 stop server.js",
-    "status": "pm2 status"
+    "status": "pm2 status && pm2 logs"
   },
   "author": "Iglan Cardeal",
   "license": "ISC",

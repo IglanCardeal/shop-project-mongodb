@@ -1,7 +1,7 @@
 node_modules
 *.log
-backup
 .vscode
 .env
 wrap-up.js
 app/public/users/*
+incluir.md

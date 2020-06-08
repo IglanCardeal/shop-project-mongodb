@@ -44,13 +44,13 @@ module.exports = multer => {
     equivalentMonth.toString()
   );
 
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
-  const destinationExist = fs.existsSync(destination);
+  // // eslint-disable-next-line security/detect-non-literal-fs-filename
+  // const destinationExist = fs.existsSync(destination);
 
-  if (!destinationExist) {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    fs.mkdirSync(destination);
-  }
+  // if (!destinationExist) {
+  //   // eslint-disable-next-line security/detect-non-literal-fs-filename
+  //   fs.mkdirSync(destination);
+  // }
 
   const fileStorage = multer.diskStorage({
     destination: path.join(
