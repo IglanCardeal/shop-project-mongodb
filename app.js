@@ -26,7 +26,7 @@ app.set('view engine', 'ejs');
 app.set('views', './app/views');
 
 app.use(helmet());
-app.use(compression());
+app.use(compression()); // compression deve ser usada caso o provedor nao ofereca suporte para compressao de arquivos staticos.
 app.use(session(sessionSetup));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
