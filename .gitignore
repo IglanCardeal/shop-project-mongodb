@@ -4,3 +4,4 @@ backup
 .vscode
 .env
 wrap-up.js
+app/public/users/*

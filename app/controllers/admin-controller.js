@@ -53,6 +53,8 @@ exports.getProducts = async (req, res, next) => {
       userId
     );
 
+    console.log(products);
+
     return res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',

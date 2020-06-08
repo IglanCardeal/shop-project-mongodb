@@ -24,16 +24,12 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', './app/views');
 
-/**
- * @helmet pode ajudar a proteger o aplicativo de algumas vulnerabilidades da web
- * bastante conhecidas configurando os cabeçalhos HTTP adequadamente.
- */
 app.use(helmet());
 app.use(session(sessionSetup));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Armazenamento de imgs.
+// Armazenamento de imgs. Esse use deve ficar somente na rota de upload. Recolocar este trecho.
 app.use(
   multer({
     storage: fileUploadHandler(multer).fileStorage,

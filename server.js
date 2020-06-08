@@ -5,7 +5,8 @@ const app = require('./app');
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+const { PORT = 3000 } = process.env;
+const { NODE_ENV } = process.env;
 const { log } = console;
 
 try {
@@ -14,7 +15,7 @@ try {
 
     app.listen(PORT, () => {
       log(`Server On - PORT ${PORT} `);
-      log(`Enviroment: ${process.env.NODE_ENV} `);
+      log(`Enviroment: ${NODE_ENV} `);
     });
   });
 } catch (error) {
