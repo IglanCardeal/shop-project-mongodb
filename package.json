@@ -2,12 +2,13 @@
   "name": "shop-project-mongodb",
   "version": "1.0.0",
   "description": "Projeto Shop Online com NodeJs e MongoDB",
-  "main": "app.js",
+  "main": "./src/server.js",
   "scripts": {
-    "dev": "NODE_ENV=development nodemon server.js",
-    "start": "NODE_ENV=production pm2 start server.js -i 0",
+    "dev": "NODE_ENV=development nodemon ./src/server.js",
+    "start": "NODE_ENV=production pm2 start ./src/server.js -i 0",
     "stop": "pm2 stop server.js",
-    "status": "pm2 status && pm2 logs"
+    "status": "pm2 status && pm2 logs",
+    "before": "npx migrate up"
   },
   "author": "Iglan Cardeal",
   "license": "ISC",
@@ -28,6 +29,7 @@
     "prettier": "^1.19.1"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
@@ -40,6 +42,7 @@
     "express-session": "^1.17.1",
     "express-validator": "^5.3.1",
     "helmet": "^3.22.0",
+    "migrate-mongoose": "^4.0.0",
     "mongodb": "^3.5.8",
     "mongoose": "^5.9.18",
     "multer": "^1.4.2",

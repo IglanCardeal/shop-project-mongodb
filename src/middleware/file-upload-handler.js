@@ -35,7 +35,7 @@ module.exports = multer => {
 
   const fileStorage = multer.diskStorage({
     destination: path.join(
-      'app',
+      'uploads',
       'public',
       'users',
       currentYear.toString(),

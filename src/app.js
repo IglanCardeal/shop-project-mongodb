@@ -23,7 +23,7 @@ const app = express();
 
 // Setup das engines e views.
 app.set('view engine', 'ejs');
-app.set('views', './app/views');
+app.set('views', path.resolve(__dirname, 'app', 'views'));
 
 app.use(helmet());
 app.use(compression()); // compression deve ser usada caso o provedor nao ofereca suporte para compressao de arquivos staticos.
@@ -39,8 +39,8 @@ app.use(
   }).single('image')
 );
 
-app.use(express.static(path.join(__dirname, 'app', 'public')));
-app.use(express.static(path.join(__dirname))); // para arquivos de imagens de usuario.
+app.use(express.static(path.join(__dirname, 'app', 'public'))); // para os assets.
+app.use(express.static(path.resolve(__dirname, '..'))); // para arquivos uploads.
 app.use(csrf());
 app.use(flash());
 app.use(checkSession);

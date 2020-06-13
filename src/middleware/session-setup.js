@@ -1,7 +1,3 @@
-/**
- * @SessionsAndCookies
- * Definido configuracao das sessoes e cookies.
- */
 const session = require('express-session');
 const SessionStore = require('connect-mongodb-session')(session);
 const dotenv = require('dotenv');
@@ -21,7 +17,6 @@ const sessionDataBase = new SessionStore({
 
 module.exports = {
   secret: [
-    '787hhasn12ks2k1bnbs1qpoiewa10xssd000212Wssadl9112',
     'lord_vader_will_smash_the_rebels',
   ],
   resave: false, // Nao renova id de sessao.

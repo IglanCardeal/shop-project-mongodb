@@ -14,6 +14,8 @@ module.exports = (error, req, res, next) => {
 
   const filepath = join(__dirname, '../logs/errors.log');
 
+  console.log(filepath);
+
   generateLogErrors(error, filepath, error.statusCode);
 
   /**

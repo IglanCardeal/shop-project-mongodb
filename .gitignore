@@ -3,5 +3,4 @@ node_modules
 .vscode
 .env
 wrap-up.js
-app/public/users/*
-incluir.md
+features.md

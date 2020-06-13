@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
-const open = require('open');
+// const open = require('open');
 
-const dataBaseConnection = require('./database/connection');
+const dataBaseConnection = require('../database/connection');
 const app = require('./app');
 
 dotenv.config();
@@ -23,11 +23,11 @@ try {
       // Comente esse bloco caso faca alteracoes no codigo.
       // Caso contratio, ao restart do nodemon, ira abrir uma
       // nova aba do firefox a cada restart do servidor.
-      if (NODE_ENV === 'development') {
-        log(`Lauching application on ${BASE_URL}`);
+      // if (NODE_ENV === 'development') {
+      //   log(`Lauching application on ${BASE_URL}`);
 
-        open(BASE_URL);
-      }
+      //   open(BASE_URL);
+      // }
       // =====================================================
     });
   });
