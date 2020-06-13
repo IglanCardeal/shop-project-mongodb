@@ -1,6 +1,6 @@
 <%- include('../includes/head.ejs') %>
-    <link rel="stylesheet" href="/css/forms.css">
-    <link rel="stylesheet" href="/css/auth.css">
+    <!-- <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/auth.css"> -->
     <style>
       .error {
         color: rgb(201, 9, 9);
@@ -16,28 +16,32 @@
 
 <body>
    <%- include('../includes/navigation.ejs') %>
-
-    <main>
+   <main>
+    <div class="container col-12 col-sm-6 offset-md-3 mt-auto">
       <span class="error"> <%= error %> </span>
-      <form class="login-form" action="/signup" method="POST" novalidate>
-        <div class="form-control">
-            <label for="usename">Name</label>
-            <input class="<%= field === 'username' ? 'invalid' : '' %>" type="text" name="username" id="username" value="<%= username %>">
+      <form action="/signup" method="POST">
+        <div class="form-group">
+          <label for="username">Your name</label>
+          <input type="text" class="form-control" id="username" name="username" aria-describedby="username" placeholder="e.g. Cardeal" value="<%= username %>">
         </div>
-            <div class="form-control">
-                <label for="email">E-Mail</label>
-                <input class="<%= field === 'email' ? 'invalid' : '' %>" type="email" name="email" id="email" value="<%= email %>">
-            </div>
-            <div class="form-control">
-                <label for="password">Password</label>
-                <input class="<%= field === 'password' ? 'invalid' : '' %>" type="password" name="password" id="password">
-            </div>
-            <div class="form-control">
-                <label for="confirmPassword">Confirm Password</label>
-                <input class="<%= field === 'confirmPassword' ? 'invalid' : '' %>" type="password" name="confirmPassword" id="confirmPassword">
-            </div>
-            <button class="btn" type="submit">Signup</button>
-            <%- include('../includes/csrf-token.ejs') %>
-        </form>
-    </main>
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="e.g. myemail@gmail.com" value="<%= email %>">
+          <small id="email" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Use only alphanumerics characters">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm password</label>
+          <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Repeat password here">
+        </div>
+        <button type="submit" class="btn btn-primary" id="submit">Signup</button>
+        <%- include('../includes/csrf-token.ejs') %>
+      </form>
+    </div>
+  </main>
+
+    
 <%- include('../includes/end.ejs') %>

@@ -25,7 +25,7 @@ const inCaseOfInvalidData = (res, email, errorMsg, field) => {
   });
 };
 
-const generateRandomToken = async () => {
+const generateRandomToken = () => {
   // eslint-disable-next-line promise/avoid-new
   return new Promise((resolve, reject) => {
     crypto.randomBytes(32, (error, buffer) => {
@@ -214,6 +214,7 @@ exports.postReset = async (req, res, next) => {
     }
 
     const token = await generateRandomToken();
+    
     user.resetToken = token;
 
     // 1 hora para expirar o token.

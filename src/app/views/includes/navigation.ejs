@@ -1,6 +1,6 @@
 <div class="backdrop"></div>
 <header class="main-header fixed-top">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-dark bg-dark">
     <span class="navbar-brand text-success ml-lg-4" href="#">Books Shop</span>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -9,39 +9,39 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto ml-sm-2 ml-lg-4">
         <li class="nav-item  py-2">
-          <a class="<%= path === '/' ? 'disabled' : '' %> nav-link" href="/">Shop</a>
+          <a class="<%= path === '/' ? 'disabled' : 'text-white' %> nav-link" href="/">Shop</a>
         </li>
         <li class="nav-item  py-2">
-          <a class="<%= path === '/products' ? 'disabled' : '' %> nav-link" href="/products"
+          <a class="<%= path === '/products' ? 'disabled' : 'text-white' %> nav-link" href="/products"
             >Products</a
           >
         </li>
         <% if (isAuthenticated) {%>
           <li class="nav-item  py-2">
-            <a class="<%= path === '/cart' ? 'disabled' : '' %> nav-link" href="/cart">Cart</a>
+            <a class="<%= path === '/cart' ? 'disabled' : 'text-white' %> nav-link" href="/cart">Cart</a>
           </li>
           <li class="nav-item  py-2">
-            <a class="<%= path === '/orders' ? 'disabled' : '' %> nav-link" href="/orders"
+            <a class="<%= path === '/orders' ? 'disabled' : 'text-white' %> nav-link" href="/orders"
               >Orders</a
             >
           </li>
           <li class="nav-item  py-2">
             <a
-              class="<%= path === '/admin/add-product' ? 'disabled' : '' %> nav-link"
+              class="<%= path === '/admin/add-product' ? 'disabled' : 'text-white' %> nav-link"
               href="/admin/add-product"
               >Add Product
             </a>
           </li>
           <li class="nav-item  py-2">
             <a
-              class="<%= path === '/admin/products' ? 'disabled' : '' %> nav-link"
+              class="<%= path === '/admin/products' ? 'disabled' : 'text-white' %> nav-link"
               href="/admin/products"
               >Admin Products
             </a>
           </li>
           <li class="nav-item  py-2">
             <a
-              class="<%= path === '/user' ? 'disabled' : '' %> nav-link"
+              class="<%= path === '/user' ? 'disabled' : 'text-white' %> nav-link"
               href="/admin/about-user"
               data="user-name"
             ></a>
@@ -59,12 +59,12 @@
       <% if (!isAuthenticated) { %>
         <ul class="navbar-nav mr-lg-4">
           <li class="nav-item my-4 my-sm-2 ml-lg-4 col-4 offset-8 col-lg-6 offset-lg-0">
-            <a class="<%= path === '/login' ? 'disabled' : '' %> nav-link btn btn-primary btn-sm text-white" href="/login"
+            <a class="nav-link btn btn-secondary btn-sm text-white <%= path === '/login' ? 'disabled bg-dark border-0' : 'text-white' %>" href="/login"
               >Login</a
             >
           </li>
           <li class="nav-item my-sm-2 col-4 offset-8 col-lg-6 offset-lg-0">
-            <a class="<%= path === '/signup' ? 'disabled' : '' %> nav-link btn btn-secondary btn-sm text-white " href="/signup"
+            <a class="nav-link btn btn-secondary btn-sm text-white <%= path === '/signup' ? 'disabled bg-dark border-0' : 'text-white' %>" href="/signup"
               >Signup</a
             >
           </li>
@@ -78,135 +78,3 @@
     </div>
   </nav>
 </header>
-
-<!-- <div class="backdrop"></div>
-<header class="main-header">
-  <button id="side-menu-toggle">Menu</button>
-  <nav class="main-header__nav">
-    <ul class="main-header__item-list">
-      <li class="main-header__item">
-        <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
-      </li>
-      <li class="main-header__item">
-        <a class="<%= path === '/products' ? 'active' : '' %>" href="/products"
-          >Products</a
-        >
-      </li>
-      <% if (isAuthenticated) {%>
-      <li class="main-header__item">
-        <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
-      </li>
-      <li class="main-header__item">
-        <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders"
-          >Orders</a
-        >
-      </li>
-      <li class="main-header__item">
-        <a
-          class="<%= path === '/admin/add-product' ? 'active' : '' %>"
-          href="/admin/add-product"
-          >Add Product
-        </a>
-      </li>
-      <li class="main-header__item">
-        <a
-          class="<%= path === '/admin/products' ? 'active' : '' %>"
-          href="/admin/products"
-          >Admin Products
-        </a>
-      </li>
-      <li class="main-header__item user">
-        <a
-          class="<%= path === '/user' ? 'active' : '' %>"
-          href="/admin/about-user"
-          data="user-name"
-        ></a>
-      </li>
-      <% } %>
-    </ul>
-    <ul class="main-header__item-list">
-      <% if (!isAuthenticated) { %>
-      <li class="main-header__item">
-        <a class="<%= path === '/login' ? 'active' : '' %>" href="/login"
-          >Login</a
-        >
-      </li>
-      <li class="main-header__item">
-        <a class="<%= path === '/signup' ? 'active' : '' %>" href="/signup"
-          >Signup</a
-        >
-      </li>
-      <% } else { %>
-      <li class="main-header__item">
-        <form action="/logout" method="POST">
-          <button type="submit" class="logout">Logout</button> <%-
-          include('../includes/csrf-token.ejs') %>
-        </form>
-      </li>
-      <% } %>
-    </ul>
-  </nav>
-</header>
-
-<nav class="mobile-nav">
-  <ul class="mobile-nav__item-list">
-    <li class="mobile-nav__item">
-      <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
-    </li>
-    <li class="mobile-nav__item">
-      <a class="<%= path === '/products' ? 'active' : '' %>" href="/products"
-        >Products</a
-      >
-    </li>
-    <% if (isAuthenticated) { %>
-    <li class="mobile-nav__item">
-      <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
-    </li>
-    <li class="mobile-nav__item">
-      <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders"
-        >Orders</a
-      >
-    </li>
-    <li class="mobile-nav__item">
-      <a
-        class="<%= path === '/admin/add-product' ? 'active' : '' %>"
-        href="/admin/add-product"
-        >Add Product
-      </a>
-    </li>
-    <li class="mobile-nav__item">
-      <a
-        class="<%= path === '/admin/products' ? 'active' : '' %>"
-        href="/admin/products"
-        >Admin Products
-      </a>
-    </li>
-    <li class="mobile-nav__item">
-      <a
-        class="<%= path === '/user' ? 'active' : '' %>"
-        href="/admin/about-user"
-        data="mobile-user-name"
-      >
-      </a>
-    </li>
-    <% } %> <% if (!isAuthenticated) { %>
-    <li class="mobile-nav__item">
-      <a class="<%= path === '/login' ? 'active' : '' %>" href="/login"
-        >Login</a
-      >
-    </li>
-    <li class="mobile-nav__item">
-      <a class="<%= path === '/signup' ? 'active' : '' %>" href="/signup"
-        >Signup</a
-      >
-    </li>
-    <% } else { %>
-    <li class="mobile-nav__item">
-      <form action="/logout" method="post">
-        <button type="submit">Logout</button> <%-
-        include('../includes/csrf-token.ejs') %>
-      </form>
-    </li>
-    <% } %>
-  </ul>
-</nav>  -->
