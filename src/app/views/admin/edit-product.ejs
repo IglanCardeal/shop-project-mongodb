@@ -18,13 +18,13 @@
               </div>
               <div class="form-group">
                 <label for="price">Price</label>
-                <input type="number" class="form-control" name="price" id="price" step="0.1" value="<% if (editing) { %><%= product.price %><% }else{ %><%= price %> <% } %>">
+                <input type="number" class="form-control col-4 col-md-2" name="price" id="price" step="0.1" value="<% if (editing) { %><%= product.price %><% }else{ %><%= price %> <% } %>">
               </div>
               <div class="form-group">
                 <label for="description">Description</label>
                 <textarea name="description" class="form-control" id="description" rows="5"><% if (editing) { %><%= product.description %><%}else{ %><%=description%><%}%></textarea>
               </div>
-              <input type="hidden" value="<%= product._id %>" name="productId" />
+              <% if (editing) { %> <input type="hidden" value="<%= product._id %>" name="productId" /> <% } %>
               <button class="btn btn-secondary" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>
               <%- include('../includes/csrf-token.ejs') %>
             </form>
