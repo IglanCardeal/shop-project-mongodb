@@ -5,8 +5,8 @@ const helmet = require('helmet');
 const session = require('express-session');
 const csrf = require('csurf');
 const flash = require('connect-flash');
-const multer = require('multer');
 const compression = require('compression');
+const multer = require('multer');
 
 const routes = require('./app/routes/export.routes');
 const errorController = require('./app/controllers/error-controller');

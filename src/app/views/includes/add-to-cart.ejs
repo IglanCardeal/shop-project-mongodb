@@ -1,6 +1,6 @@
 <% if (isAuthenticated) { %>
-<form action="/cart" method="post">
-  <button class="btn" type="submit">Add to Cart</button>
+<form action="/cart" method="post" class="d-inline p-2">
+  <button class="btn btn-secondary text-white my-2" type="submit">Add to Cart</button>
   <input type="hidden" name="productId" value="<%= product._id %>" /> <%-
   include('../includes/csrf-token.ejs') %>
 </form>

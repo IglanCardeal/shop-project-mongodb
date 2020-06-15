@@ -1,52 +1,36 @@
 <%- include('../includes/head.ejs') %>
-    <link rel="stylesheet" href="/css/forms.css">
-    <link rel="stylesheet" href="/css/product.css">
-    <style>
-      .error {
-        color: rgb(201, 9, 9);
-        font-weight: normal;
-        font-size: 18px;
-        display: block;
-        text-align: center;
-        text-shadow: 0 1px 1px black;
-        text-transform: uppercase;
-      }
-    </style>
+
 </head>
 
 <body>
    <%- include('../includes/navigation.ejs') %>
     <main>
         <% if(isAuthenticated) { %>
-          <span class="error"> <%= error %> </span>
-          <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype="multipart/form-data">
-            <div class="form-control">
+          <div class="col-8 offset-2 col-md-8 offset-2 col-xl-4 offset-xl-4">
+            <form action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype="multipart/form-data">
+              <div class="form-group">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" value="<% if (editing) { %><%= product.title %><% }else{ %><%= title %> <% } %>">
-            </div>
-            <div class="form-control">
-                <label for="image">Image URL</label>
-                <input type="file" name="image" id="image">
-            </div>
-            <div class="form-control">
+                <input type="text" class="form-control" name="title" id="title" value="<% if (editing) { %><%= product.title %><% }else{ %><%= title %> <% } %>">
+              </div>
+              <div class="form-group">
+                <label for="image">Image</label>
+                <input type="file" class="form-control-file" name="image" id="image">
+              </div>
+              <div class="form-group">
                 <label for="price">Price</label>
-                <input type="number" name="price" id="price" step="0.1" value="<% if (editing) { %><%= product.price %><% }else{ %><%= price %> <% } %>">
-            </div>
-            <div class="form-control">
+                <input type="number" class="form-control" name="price" id="price" step="0.1" value="<% if (editing) { %><%= product.price %><% }else{ %><%= price %> <% } %>">
+              </div>
+              <div class="form-group">
                 <label for="description">Description</label>
-                <textarea name="description" id="description" rows="5"><% if (editing) { %><%= product.description %><%}else{ %><%=description%><%}%></textarea>
-            </div>
-            <% if (editing) { %>
-                <input type="hidden" value="<%= product._id %>" name="productId">
-            <% }else{ %>
-                <input type="hidden" value="<%= productId %>" name="productId">
-            <% } %>
-
-            <button class="btn" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>
-            <%- include('../includes/csrf-token.ejs') %>
-          </form>
-        <% } else {%>
-          <h1>You are not logged in!</h1>
-        <% } %>
+                <textarea name="description" class="form-control" id="description" rows="5"><% if (editing) { %><%= product.description %><%}else{ %><%=description%><%}%></textarea>
+              </div>
+              <input type="hidden" value="<%= product._id %>" name="productId" />
+              <button class="btn btn-secondary" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>
+              <%- include('../includes/csrf-token.ejs') %>
+            </form>
+          </div>
+          <% } else {%>
+            <h1 class="text-center text-warning">You are not logged in!</h1>
+          <% } %>
     </main>
 <%- include('../includes/end.ejs') %>

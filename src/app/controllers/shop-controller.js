@@ -13,7 +13,7 @@ const { catchServerErrorFunction } = require('./error-controller');
 
 const paginationFunction = require('../utils/pagination-function');
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 6;
 
 const getDataFromCart = products => {
   // remover este codigo e deixar o controle do carrinho para o servidor.

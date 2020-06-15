@@ -1,67 +1,53 @@
     <%- include('../includes/head.ejs') %>
-      <link rel="stylesheet" href="/css/product.css">
-      <style>
-          .empty {
-            display: block;
-            text-align: center;
-          }
-
-          .error {
-            color: rgb(201, 9, 9);
-            font-weight: normal;
-            font-size: 18px;
-            display: block;
-            text-align: center;
-            text-shadow: 0 1px 1px black;
-            text-transform: uppercase;
-          }
-      </style>
     </head>
 
     <body>
         <%- include('../includes/navigation.ejs') %>
 
-            <main>
-                <span class="error"> <%= error %> </span>
-                <% if (isAuthenticated) { %>
-                  <% if (prods.length > 0) { %>
-                    <div class="grid">
-                      <% for (let product of prods) { %>
-                        <article class="card product-item">
-                          <header class="card__header">
-                            <h1 class="product__title">
-                              <%= product.title %>
-                            </h1>
-                          </header>
-                          <div class="card__image">
-                            <img src="/<%= product.imageUrl %>" alt="<%= product.title %>">
-                          </div>
-                          <div class="card__content">
-                            <h2 class="product__price">$
-                                <%= product.price %>
-                            </h2>
-                            <p class="product__description">
-                                <%= product.description %>
-                            </p>
-                          </div>
-                          <div class="card__actions">
-                            <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
-                              <input type="hidden" value="<%= product._id %>" name="productId">
-                              <button class="btn" type="button" onclick="deleteProduct(this)">Delete</button>
-                              <%- include('../includes/csrf-token.ejs') %>
-                          </div>
-                        </article>
-                      <% } %>
+        <main>
+          <div class="container col-12 ">
+            <span class="text-warning text-center"> <%= error %> </span>
+            <% if (isAuthenticated) { %>
+              <% if (prods.length > 0) { %>
+                <div class="row mx-2">
+                  <% for (let product of prods) { %>
+                    <div class="card col-6 col-md-4 col-lg-3 col-xl-2 my-4">
+                      <img class="card-img-top" src="/<%= product.imageUrl %>" alt="<%= product.title %>">
+                      <div class="card-body">
+                        <h5 class="card-title"><%= product.title %></h5>
+                        <p class="card-text"><%= product.description %></p>
+                      </div>
+                      <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Price: <strong>$<%= product.price %></strong></li>
+                      </ul>
+                      <!-- <div class="card__actions">
+                        <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
+                          <input type="hidden" value="<%= product._id %>" name="productId">
+                          <button class="btn" type="button" onclick="deleteProduct(this)">Delete</button>
+                          <%- include('../includes/csrf-token.ejs') %>
+                      </div> -->
+                      <div class="card-body text-center">
+                        <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn btn-info">Edit</a>
+                          <form action="#" class="form" method="POST">
+                            <input type="hidden" value="<%= product._id %>" name="productId" />
+                            <button class="btn btn-danger my-4" type="submit">Delete</button>
+                          <%- include('../includes/csrf-token.ejs') %>
+                          </form>
+                      </div>
                     </div>
-                    <!-- ------------- PAGINACAO ------------- -->
-                    <%- include('../includes/pagination.ejs') %>
-                    <!-- ------------- ----------- ------------- -->
-                  <% } else { %>
-                      <h1 class="empty">No Products Found!</h1>
                   <% } %>
-                <% } else { %>
-                  <h1 class="empty">You are not logged!</h1>
-                <% } %>
-            </main>
-            <script src="/js/admin/admin-products.js"></script>
-      <%- include('../includes/end.ejs') %>
+                </div>
+                <!-- ------------- PAGINACAO ------------- -->
+                <%- include('../includes/pagination.ejs') %>
+                <!-- ------------- ----------- ------------- -->
+              <% } else { %>
+                <h1 class="text-warning text-center">No Products Found!</h1>
+              <% } %>
+            <% } else { %>
+              <h1 class="empty text-center text-danger">You are not logged!</h1>
+            <% } %>
+          </div>
+        </main>
+
+        <script src="/js/admin/admin-products.js"></script>
+    <%- include('../includes/end.ejs') %>

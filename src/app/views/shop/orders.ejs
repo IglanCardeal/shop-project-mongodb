@@ -12,7 +12,7 @@
     <%- include('../includes/navigation.ejs') %>
     <main>
         <% if (orders.length <= 0) { %>
-          <h1 class="empty">No orders for while!</h1>
+          <h1 class="empty text-warning text-center">No orders for while!</h1>
         <% } else { %>
           <ul class="orders">
             <% orders.forEach(order => { %>

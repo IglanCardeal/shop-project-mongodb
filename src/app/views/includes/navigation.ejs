@@ -9,46 +9,46 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto ml-sm-2 ml-lg-4">
         <li class="nav-item  py-2">
-          <a class="<%= path === '/' ? 'disabled' : 'text-white' %> nav-link" href="/">Shop</a>
+          <a class="<%= path === '/' ? 'disabled text-warning' : 'text-white' %> nav-link" href="/">Shop</a>
         </li>
         <li class="nav-item  py-2">
-          <a class="<%= path === '/products' ? 'disabled' : 'text-white' %> nav-link" href="/products"
+          <a class="<%= path === '/products' ? 'disabled text-warning' : 'text-white' %> nav-link" href="/products"
             >Products</a
           >
         </li>
         <% if (isAuthenticated) {%>
           <li class="nav-item  py-2">
-            <a class="<%= path === '/cart' ? 'disabled' : 'text-white' %> nav-link" href="/cart">Cart</a>
+            <a class="<%= path === '/cart' ? 'disabled text-warning' : 'text-white' %> nav-link" href="/cart">Cart</a>
           </li>
           <li class="nav-item  py-2">
-            <a class="<%= path === '/orders' ? 'disabled' : 'text-white' %> nav-link" href="/orders"
+            <a class="<%= path === '/orders' ? 'disabled text-warning' : 'text-white' %> nav-link" href="/orders"
               >Orders</a
             >
           </li>
           <li class="nav-item  py-2">
             <a
-              class="<%= path === '/admin/add-product' ? 'disabled' : 'text-white' %> nav-link"
+              class="<%= path === '/admin/add-product' ? 'disabled text-warning' : 'text-white' %> nav-link"
               href="/admin/add-product"
               >Add Product
             </a>
           </li>
           <li class="nav-item  py-2">
             <a
-              class="<%= path === '/admin/products' ? 'disabled' : 'text-white' %> nav-link"
+              class="<%= path === '/admin/products' ? 'disabled text-warning' : 'text-white' %> nav-link"
               href="/admin/products"
-              >Admin Products
+              >My Products
             </a>
           </li>
           <li class="nav-item  py-2">
             <a
-              class="<%= path === '/user' ? 'disabled' : 'text-white' %> nav-link"
+              class="<%= path === '/user' ? 'disabled text-warning' : 'text-white' %> nav-link"
               href="/admin/about-user"
               data="user-name"
             ></a>
           </li>
         <% } %>
         <!-- Adicionar funcionalidade de filtro no controller -->
-        <form class="form-inline ml-sm-2 ml-md-4 my-2 my-sm-0">
+        <form class="form-inline ml-sm-2 ml-md-0 my-2 my-sm-0">
           <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success  my-2" type="submit">Search</button>
         </form>
@@ -70,9 +70,9 @@
           </li>
         </ul>
       <% } else { %>
-        <form action="/logout" method="POST" class="ml-md-5 py-2">
-          <button type="submit" class="btn btn-dark">Logout</button> <%-
-          include('../includes/csrf-token.ejs') %>
+        <form action="/logout" method="POST" class="col-1 offset-10 ml-md-2 ml-md-5 my-lg-2">
+          <button type="submit" class="btn btn-warning">Logout</button> 
+          <%- include('../includes/csrf-token.ejs') %>
         </form>
       <% } %>
     </div>
