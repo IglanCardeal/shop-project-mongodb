@@ -5,12 +5,12 @@
     <body>
         <%- include('../includes/navigation.ejs') %>
 
-        <main class="centered">
-          <div class="row container col-12">
-            <div class="col-6">
-              <img class="card-img-top" src="/<%= product.imageUrl %>" alt="<%= product.title %>">
+        <main>
+          <div class="row col-10   offset-2">
+            <div class="float-left">
+              <img class="img-thumbnail" src="/<%= product.imageUrl %>" alt="<%= product.title %>">
             </div>
-            <div class="col-6">
+            <div class="float-right">
               <div class="card" style="width: 18rem;">
                 <ul class="list-group list-group-flush">
                   <li class="list-group-item">Cras justo odio</li>
@@ -18,7 +18,7 @@
                   <li class="list-group-item">Vestibulum at eros</li>
                 </ul>
               </div>
-            </div>
+            </div> 
           </div>
 
           <!-- <div class="product-detail">

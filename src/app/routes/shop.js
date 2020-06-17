@@ -41,6 +41,6 @@ router.post(
 
 router.post('/order', checkAuthentication, shopController.postOrder);
 
-router.post('/ajax-get-cart', checkAuthentication, shopController.ajaxGetCart);
+// router.post('/ajax-get-cart', checkAuthentication, shopController.ajaxGetCart);
 
 module.exports = router;

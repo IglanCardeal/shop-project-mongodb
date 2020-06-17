@@ -28,7 +28,7 @@
                       </div> -->
                       <div class="card-body text-center">
                         <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn btn-info">Edit</a>
-                          <form action="#" class="form" method="POST">
+                          <form action="/admin/delete-product/" class="form" method="POST">
                             <input type="hidden" value="<%= product._id %>" name="productId" />
                             <button class="btn btn-danger my-4" type="submit">Delete</button>
                           <%- include('../includes/csrf-token.ejs') %>

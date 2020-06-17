@@ -6,8 +6,9 @@ const Product = require('../models/product');
 const { catchServerErrorFunction } = require('./error-controller');
 const paginationFunction = require('../utils/pagination-function');
 const { deleteFile } = require('../utils/delete-file');
+const { compressImage } = require('../../middleware/compress-image');
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 6;
 
 const postAddError = (res, title, price, description, errorMsg) => {
   return res.status(422).render('admin/edit-product', {
@@ -98,19 +99,23 @@ exports.postAddProduct = async (req, res, next) => {
     );
   }
 
-  const product = new Product({
-    title: newBook.title,
-    price: newBook.price,
-    description: newBook.description,
-    imageUrl: image.path,
-    userId: userId,
-  });
-
   try {
+    const newPath = await compressImage(req.file);
+
+    const product = new Product({
+      title: newBook.title,
+      price: newBook.price,
+      description: newBook.description,
+      imageUrl: newPath,
+      userId: userId,
+    });
+
     await product.save();
 
-    res.redirect('/admin/products');
+    return res.redirect('/admin/products');
   } catch (error) {
+    deleteFile(product.imageUrl);
+
     catchServerErrorFunction(
       error,
       500,
@@ -194,11 +199,15 @@ exports.postEditProduct = async (req, res, next) => {
 
     if (image) {
       deleteFile(product.imageUrl);
-      product.imageUrl = image.path;
+
+      const newPath = await compressImage(req.file);
+
+      product.imageUrl = newPath;
     }
 
     await product.save();
-    res.redirect('/admin/products');
+
+    return res.redirect('/admin/products');
   } catch (error) {
     catchServerErrorFunction(
       error,
@@ -211,7 +220,7 @@ exports.postEditProduct = async (req, res, next) => {
 };
 
 exports.deleteProduct = async (req, res, next) => {
-  const { productId } = req.params;
+  const { productId } = req.body;
   const userId = req.user._id;
 
   try {
@@ -223,7 +232,7 @@ exports.deleteProduct = async (req, res, next) => {
       userId: userId,
     }).exec();
 
-    res.status(200).json({ msg: 'Success!' });
+    res.redirect('/admin/products');
   } catch (error) {
     res.status(500).json({ msg: 'Delete product fail!' });
   }

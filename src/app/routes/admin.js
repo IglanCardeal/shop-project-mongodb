@@ -1,9 +1,3 @@
-/**
- * Rotas de administracao.
- * Para as rotas de admin, ambas tem o prefixo '/admin' ajustado no app.use('/admin',
- * adminRoutes) no arquivo App.js
- */
-
 const express = require('express');
 const { body } = require('express-validator/check');
 const adminController = require('../controllers/admin-controller');
@@ -49,8 +43,8 @@ router.post(
 router.post('/postUserData', checkAuthentication, adminController.postUserData);
 
 // DELETE
-router.delete(
-  '/product/:productId',
+router.post(
+  '/delete-product',
   checkAuthentication,
   adminController.deleteProduct
 );

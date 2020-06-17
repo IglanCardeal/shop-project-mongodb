@@ -15,27 +15,27 @@ const paginationFunction = require('../utils/pagination-function');
 
 const ITEMS_PER_PAGE = 6;
 
-const getDataFromCart = products => {
-  // remover este codigo e deixar o controle do carrinho para o servidor.
-  const productsData = [];
-  const idsArray = [];
-  let totalPrice = 0;
+// const getDataFromCart = products => {
+//   // remover este codigo e deixar o controle do carrinho para o servidor.
+//   const productsData = [];
+//   const idsArray = [];
+//   let totalPrice = 0;
 
-  products.forEach(order => {
-    totalPrice += order.quantity * order.productId.price;
-    idsArray.push(order.productId._id);
-    productsData.push({
-      data: order.productId,
-      quantity: order.quantity,
-    });
-  });
+//   products.forEach(order => {
+//     totalPrice += order.quantity * order.productId.price;
+//     idsArray.push(order.productId._id);
+//     productsData.push({
+//       data: order.productId,
+//       quantity: order.quantity,
+//     });
+//   });
 
-  return {
-    idsArray,
-    productsData,
-    totalPrice,
-  };
-};
+//   return {
+//     idsArray,
+//     productsData,
+//     totalPrice,
+//   };
+// };
 
 exports.getIndex = async (req, res, next) => {
   try {
@@ -130,23 +130,19 @@ exports.getProduct = async (req, res, next) => {
   }
 };
 
-exports.getCart = (req, res) => {
-  return res.render('shop/cart', {
-    path: '/cart',
-    pageTitle: 'Your Cart',
-  });
-};
-
-exports.ajaxGetCart = async (req, res, next) => {
-  // remover este codigo e deixar o controle do carrinho para o servidor.
+exports.getCart = async (req, res) => {
   try {
     const user = await req.user.populate('cart.items.productId').execPopulate();
 
-    const products = user.cart.items;
+    const products = user.cart.items.map(item => {
+      return { ...item.productId._doc, quantity: item.quantity };
+    });
 
-    const jsonData = getDataFromCart(products);
-
-    return res.send(JSON.stringify(jsonData));
+    return res.render('shop/cart', {
+      path: '/cart',
+      pageTitle: 'Your Cart',
+      products: [...products, ...products, ...products]
+    });
   } catch (error) {
     return catchServerErrorFunction(
       error,
@@ -157,6 +153,24 @@ exports.ajaxGetCart = async (req, res, next) => {
     );
   }
 };
+
+// exports.getCart = async (req, res, next) => {
+//   try {
+//     const user = await req.user.populate('cart.items.productId').execPopulate();
+
+//     const products = user.cart.items;
+
+//     return res.send(JSON.stringify(jsonData));
+//   } catch (error) {
+//     return catchServerErrorFunction(
+//       error,
+//       500,
+//       'Unable to get the products in cart!',
+//       true,
+//       next
+//     );
+//   }
+// };
 
 exports.postCart = async (req, res, next) => {
   const { productId } = req.body;
@@ -217,8 +231,8 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
-/** 
- ========== Dois metodos usados para pagamento com a API @Stripe ========== 
+/**
+ ========== Dois metodos usados para pagamento com a API @Stripe ==========
 exports.getCheckout = async (req, res, next) => {
   try {
     const user = await req.user.populate("cart.items.productId").execPopulate();

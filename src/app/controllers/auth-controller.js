@@ -49,7 +49,7 @@ exports.getLogin = (req, res) => {
 };
 
 exports.postLogin = async (req, res, next) => {
-  const { email, password, keep } = req.body;
+  const { email, password, keep = undefined } = req.body;
 
   try {
     const errors = validationResult(req);
@@ -85,8 +85,8 @@ exports.postLogin = async (req, res, next) => {
     }
 
     if (keep === 'yes') {
-      const twelveHours = 86400000 / 2;
-      req.session.cookie.maxAge = twelveHours;
+      const oneMonth = 1000 * 60 * 60 * 24 * 30;
+      req.session.cookie.maxAge = oneMonth;
     }
 
     req.session.isLoggedIn = true;
@@ -214,7 +214,7 @@ exports.postReset = async (req, res, next) => {
     }
 
     const token = await generateRandomToken();
-    
+
     user.resetToken = token;
 
     // 1 hora para expirar o token.

@@ -1,34 +1,117 @@
-  <%- include('../includes/head.ejs') %>
-  <link rel="stylesheet" href="/css/cart.css">
-  <style>
-    .loading {
-      text-align: center;
-    }
-
-    .loading-gif {
-      height: 10vw; 
-      max-height: 150px;
-      min-height: 75px;
-      width: auto;
-    }
-
-    .loading-title {
-      font-size: 1.5rem;
-      text-shadow: 0 1px 1px #115e2e;
-    }
-  </style>
+<%- include('../includes/head.ejs') %>
 
 </head>
 
-    <body>
+  <body>
 
-        <%- include('../includes/navigation.ejs') %>
+    <%- include('../includes/navigation.ejs') %>
 
-        <main id="main">
-          <div id="content">
+    <main>
+      <div id="container">
+        <% if(products.length > 0) {%>
+          <div class="pb-5">
+            <div class="container">
+              <div class="row">
+                <div class="col-lg-12 p-5 bg-white rounded shadow mb-5">
+                  <div class="table-responsive">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col" class="border-1 bg-light">
+                            <div class="p-2 px-3 text-uppercase">Product</div>
+                          </th>
+                          <th scope="col" class="border-1 bg-light">
+                            <div class="py-2 text-uppercase">Price</div>
+                          </th>
+                          <th scope="col" class="border-1 bg-light">
+                            <div class="py-2 text-center text-uppercase">Quantity</div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Adiciona uma linha na tabela para cada produto. -->
+                        <% for(const product of products) { %>
+                          <tr>
+                            <th scope="row" class="border-1">
+                              <div class="p-2">
+                                <img src="/<%= product.imageUrl %>" alt="<%= product.title %>" width="70" class="img-fluid rounded shadow-sm">
+                                <div class="ml-3 d-inline-block align-middle">
+                                  <h5 class="mb-0"> <a href="/products/<%= product._id %>" class="text-dark d-inline-block align-middle"><%= product.title %></a></h5><span class="text-muted font-weight-normal font-italic d-block">Genre: Adicionar generos no Model</span>
+                                </div>
+                              </div>
+                            </th>
+                            <td class="border-1 align-middle"><strong>$<%= product.price %></strong></td>
+                            <td class="border-1 align-middle col-12 col-md-6 text-center">
+                              <strong><%= product.quantity %></strong>
+                              <div class="col-12 mt-md-4">
+                                <button class="col-12 col-md-auto btn btn-secondary btn-md ml-md-4 mt-4 mt-md-auto">-</button>
+                                <button class="col-12 col-md-auto btn btn-success btn-md ml-md-4 mt-4 mt-md-auto">+</button>
+                                <button class="col-12 col-md-auto btn btn-danger btn-md ml-md-4 mt-4 mt-md-auto">REMOVE</button>
+                              </div>
+                            </td>
+                          </tr>
+                        <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </main>
+          <!-- <div class="row">
+            <% for(const product of products) { %>
+              <div class="card col-2">
+                <img class="card-img-top" src="/<%= product.imageUrl %>" alt="<%= product.title %>">
+                <div class="card-body">
+                  <h5 class="card-title"><%= product.title %></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Cras justo odio</li>
+                  <li class="list-group-item">Dapibus ac facilisis in</li>
+                  <li class="list-group-item">Vestibulum at eros</li>
+                </ul>
+                <div class="card-body">
+                  <a href="#" class="card-link">Card link</a>
+                  <a href="#" class="card-link">Another link</a>
+                </div>
+              </div>
+            <%}%>
+          </div> -->
+        <% } else { %>
+          <h1 class="text-center text-warning">
+            No products in cart!
+          </h1>
+        <% } %>
+      </div>
+      <!-- <div id="container">
+        <% if(products.length > 0) {%>
+          <div class="row">
+            <% for(const product of products) { %>
+              <div class="card col-2">
+                <img class="card-img-top" src="/<%= product.imageUrl %>" alt="<%= product.title %>">
+                <div class="card-body">
+                  <h5 class="card-title"><%= product.title %></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Cras justo odio</li>
+                  <li class="list-group-item">Dapibus ac facilisis in</li>
+                  <li class="list-group-item">Vestibulum at eros</li>
+                </ul>
+                <div class="card-body">
+                  <a href="#" class="card-link">Card link</a>
+                  <a href="#" class="card-link">Another link</a>
+                </div>
+              </div>
+            <%}%>
+          </div>
+        <% } else { %>
+          <h1 class="text-center text-warning">
+            No products in cart!
+          </h1>
+        <% } %>
+      </div> -->
 
-        <script src="/js/cart/cart-control.js"></script>\
-        
-        <%- include('../includes/end.ejs') %>
+
+    </main>
+
+<%- include('../includes/end.ejs') %>
