@@ -30,7 +30,7 @@
   submitButton.addEventListener('click' || 'keypress', event => {
     const emailInput = document.getElementById('email').value;
     const passwordInput = document.getElementById('password').value;
-    
+
     shoudSubmitForm(event, validateEmail(emailInput), validatePassword(passwordInput));
   });
 })();

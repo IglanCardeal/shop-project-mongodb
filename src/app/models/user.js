@@ -61,7 +61,7 @@ const userSchema = new Schema({
 });
 
 // Adiciona Product ao Cart e controla a quantidade de products no cart.
-userSchema.methods.addProductToCart = async function(productId, action = null) {
+userSchema.methods.addProductToCart = async function (productId, action = null) {
   // this refere ao schema user pois se usa funcoes normais.
   const updateCartItems = [...this.cart.items];
 
@@ -81,11 +81,11 @@ userSchema.methods.addProductToCart = async function(productId, action = null) {
   if (doDecrease) {
     updateCartItems[Number(cartProductIndex)].quantity--;
 
-    if (updateCartItems[Number(cartProductIndex)].quantity === 0)
+    if (updateCartItems[Number(cartProductIndex)].quantity === 0) // remove quando qty for 0
       updateCartItems.splice(cartProductIndex, 1);
   }
 
-  // se nao existe, adiciona
+  // se nao existe, adiciona antes de incrementar
   if (cartProductIndex === -1)
     updateCartItems.push({ productId: productId, quantity: 1 });
 
@@ -106,7 +106,7 @@ userSchema.methods.addProductToCart = async function(productId, action = null) {
 };
 
 // Remove Product do Cart
-userSchema.methods.removeProductFromCart = async function(productId) {
+userSchema.methods.removeProductFromCart = async function (productId) {
   const updateCartItems = this.cart.items.filter(item => {
     return item.productId.toString() !== productId.toString();
   });
@@ -124,7 +124,7 @@ userSchema.methods.removeProductFromCart = async function(productId) {
 };
 
 // Remove e limpa todos os Products do Cart
-userSchema.methods.clearCart = async function() {
+userSchema.methods.clearCart = async function () {
   this.cart.items = [];
 
   try {

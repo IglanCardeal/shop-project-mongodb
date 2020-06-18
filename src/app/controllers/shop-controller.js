@@ -2,6 +2,7 @@
 const PDFDocumentation = require('pdfkit');
 const { createWriteStream } = require('fs');
 const path = require('path');
+const { createPublicKey } = require('crypto');
 
 const Product = require('../models/product');
 const Order = require('../models/order');
@@ -14,28 +15,6 @@ const { catchServerErrorFunction } = require('./error-controller');
 const paginationFunction = require('../utils/pagination-function');
 
 const ITEMS_PER_PAGE = 6;
-
-// const getDataFromCart = products => {
-//   // remover este codigo e deixar o controle do carrinho para o servidor.
-//   const productsData = [];
-//   const idsArray = [];
-//   let totalPrice = 0;
-
-//   products.forEach(order => {
-//     totalPrice += order.quantity * order.productId.price;
-//     idsArray.push(order.productId._id);
-//     productsData.push({
-//       data: order.productId,
-//       quantity: order.quantity,
-//     });
-//   });
-
-//   return {
-//     idsArray,
-//     productsData,
-//     totalPrice,
-//   };
-// };
 
 exports.getIndex = async (req, res, next) => {
   try {
@@ -131,17 +110,22 @@ exports.getProduct = async (req, res, next) => {
 };
 
 exports.getCart = async (req, res) => {
+  let totalPrice = 0;
+
   try {
     const user = await req.user.populate('cart.items.productId').execPopulate();
 
     const products = user.cart.items.map(item => {
+      totalPrice += +item.productId._doc.price * +item.quantity;
+
       return { ...item.productId._doc, quantity: item.quantity };
     });
 
     return res.render('shop/cart', {
       path: '/cart',
       pageTitle: 'Your Cart',
-      products: [...products, ...products, ...products]
+      totalPrice,
+      products
     });
   } catch (error) {
     return catchServerErrorFunction(
@@ -154,23 +138,41 @@ exports.getCart = async (req, res) => {
   }
 };
 
-// exports.getCart = async (req, res, next) => {
-//   try {
-//     const user = await req.user.populate('cart.items.productId').execPopulate();
+exports.postCartControlQuantity = async (req, res, next) => {
+  const { action, productId } = req.body;
 
-//     const products = user.cart.items;
+  try {
+    const actions = {
+      increase: async () => {
+        await req.user.addProductToCart(productId, action);
+      },
+      decrease: async () => {
+        await req.user.addProductToCart(productId, action);
+      },
+      delete: async () => {
+        await req.user.removeProductFromCart(req.body.productId);
+      },
+      clear: async () => {
+        await req.user.clearCart();
+      },
+    };
 
-//     return res.send(JSON.stringify(jsonData));
-//   } catch (error) {
-//     return catchServerErrorFunction(
-//       error,
-//       500,
-//       'Unable to get the products in cart!',
-//       true,
-//       next
-//     );
-//   }
-// };
+    if (actions[action])
+      await actions[action]();
+    else
+      throw 'Invalid action over cart.';
+
+    return res.redirect('/cart');
+  } catch (error) {
+    return catchServerErrorFunction(
+      error,
+      500,
+      error,
+      false,
+      next
+    );
+  }
+};
 
 exports.postCart = async (req, res, next) => {
   const { productId } = req.body;
@@ -190,49 +192,7 @@ exports.postCart = async (req, res, next) => {
   }
 };
 
-exports.postCartControlQuantity = async (req, res, next) => {
-  try {
-    // remover este codigo e deixar o controle do carrinho para o servidor.
-    const { action, productId } = req.body;
-
-    if (action === 'increase' || action === 'decrease') {
-      await req.user.addProductToCart(productId, action);
-    }
-
-    if (action === 'delete') {
-      await req.user.removeProductFromCart(productId);
-    }
-
-    return res.status(200).json();
-  } catch (error) {
-    return catchServerErrorFunction(
-      error,
-      500,
-      'Unable to control the products in cart!',
-      true,
-      next
-    );
-  }
-};
-
-exports.postCartDeleteProduct = async (req, res, next) => {
-  try {
-    await req.user.removeProductFromCart(req.body.productId);
-
-    res.redirect('/cart');
-  } catch (error) {
-    catchServerErrorFunction(
-      error,
-      500,
-      'Unable to delete the product from cart!',
-      false,
-      next
-    );
-  }
-};
-
 /**
- ========== Dois metodos usados para pagamento com a API @Stripe ==========
 exports.getCheckout = async (req, res, next) => {
   try {
     const user = await req.user.populate("cart.items.productId").execPopulate();
